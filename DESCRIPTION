@@ -1,9 +1,13 @@
-Package: BoutrosLabTemplate
+Package: OutlierDetectionAlgorithm
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Algorithm to Detect Outliers
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
+Date: 2024-01-23
+Authors@R: c(
+    person("Jee Yun", "Han", email = "jyhan@mednet.ucla.edu", role = "aut"),
+    person("John", "Sahrmann", email = "jsahrmann@mednet.ucla.edu", role = "aut"),
+    person("Paul", "Boutros", email = "pboutros@mednet.ucla.edu", role = c("aut", "cre", "cph"))
+    )
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
 Depends: 
@@ -15,3 +19,5 @@ Config/testthat/edition: 3
 License: GPL-2
 Encoding: UTF-8
 LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
