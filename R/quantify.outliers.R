@@ -6,11 +6,11 @@
 #' @param method A string indicating the quantities to be computed.  Possible values are
 #' * `'mean'` : z-scores based on mean and standard deviation or trimmed mean and trimmed standard deviation if `trim > 0`,
 #' * `'median'` : z-scores based on median and median absolute deviation, or
-#' * `'kmean'` : cluster assignment from k-means with two clusters.
+#' * `'kmeans'` : cluster assignment from k-means with two clusters.
 #' The default is z-scores based on the mean and standard deviation.
 #' @param trim A number, the fraction of observations to be trimmed from each end of `x`.  Default is no trimming.
-#' @param nstart A number, for k-means clustering, the number of random initial centers for the clusters.  Default is `1`.  See [kmeans()] for further information.
-#' @param exclude.zero A logical, whether zeros should be excluded (`TRUE`) or not excluded (`FALSE`, the default) from computations.  For `method = 'mean'` and `method = 'median'`, this means zeros will not be included in computing the summary statistics; for `method = 'kmean'`, this means zeros will be placed in their own cluster, coded `0`.
+#' @param nstart A number, for k-means clustering, the number of random initial centers for the clusters.  Default is `1`.  See [stats::kmeans()] for further information.
+#' @param exclude.zero A logical, whether zeros should be excluded (`TRUE`) or not excluded (`FALSE`, the default) from computations.  For `method = 'mean'` and `method = 'median'`, this means zeros will not be included in computing the summary statistics; for `method = 'kmeans'`, this means zeros will be placed in their own cluster, coded `0`.
 #'
 #' @return A numeric vector the same size as `x` whose values are the requested quantities computed on the corresponding elements of `x`.
 #'
@@ -59,18 +59,18 @@
 #' # Compute cluster assignments using k-means with k = 2.
 #' quantify.outliers(
 #'     x = x,
-#'     method = 'kmean'
+#'     method = 'kmeans'
 #'     );
 #' # Try different initial cluster assignments.
 #' quantify.outliers(
 #'     x = x,
-#'     method = 'kmean',
+#'     method = 'kmeans',
 #'     nstart = 10
 #'     );
 #' # Assign zeros to their own cluster.
 #' quantify.outliers(
 #'     x = x,
-#'     method = 'kmean',
+#'     method = 'kmeans',
 #'     exclude.zero = TRUE
 #'     );
 #'
@@ -91,11 +91,11 @@ quantify.outliers <- function(x, method = 'mean', trim = 0, nstart = 1, exclude.
         x[which(!is.na(x))] <- result.na;
         x;
         }
-    else if ('kmean' == method) {
+    else if ('kmeans' == method) {
         if (exclude.zero) {
             if (1 == length(unique(x.na))) {
-                kmean.matrix <- rep(NA, length(x.na));
-                names(kmean.matrix) <- names(x.na);
+                kmeans.matrix <- rep(NA, length(x.na));
+                names(kmeans.matrix) <- names(x.na);
                 }
             else {
                 data.order <- sort(x.na, decreasing = TRUE);
@@ -103,32 +103,32 @@ quantify.outliers <- function(x, method = 'mean', trim = 0, nstart = 1, exclude.
                 if (length(unique(non.zero)) <= 2) {
                     na.matrix <- rep(NA, length(non.zero));
                     cluster.zero <- c(na.matrix, rep(0, length(x.na[0 == x.na])));
-                    kmean.matrix <- cluster.zero[match(x.na, data.order)];
-                    names(kmean.matrix) <- names(x.na);
+                    kmeans.matrix <- cluster.zero[match(x.na, data.order)];
+                    names(kmeans.matrix) <- names(x.na);
                     }
                 else {
-                    kmean <- kmeans(non.zero, 2, nstart = nstart);
-                    cluster <- kmean$cluster;
+                    kmeans <- kmeans(non.zero, 2, nstart = nstart);
+                    cluster <- kmeans$cluster;
                     cluster.zero <- c(cluster, rep(0, length(x[0 == x])));
-                    kmean.matrix <- cluster.zero[match(x.na, data.order)];
-                    names(kmean.matrix) <- names(x.na);
+                    kmeans.matrix <- cluster.zero[match(x.na, data.order)];
+                    names(kmeans.matrix) <- names(x.na);
                     }
                 }
             }
 
         else {
             if (1 == length(unique(x.na))) {
-                kmean.matrix <- rep(NA, length(x.na));
-                names(kmean.matrix) <- names(x.na);
+                kmeans.matrix <- rep(NA, length(x.na));
+                names(kmeans.matrix) <- names(x.na);
                 }
             else {
-                kmean <- kmeans(x.na, 2, nstart = nstart);
-                cluster <- kmean$cluster;
-                kmean.matrix <- cluster;
-                names(kmean.matrix) <- names(x.na);
+                kmeans <- kmeans(x.na, 2, nstart = nstart);
+                cluster <- kmeans$cluster;
+                kmeans.matrix <- cluster;
+                names(kmeans.matrix) <- names(x.na);
                 }
             }
-        result.na <- kmean.matrix;
+        result.na <- kmeans.matrix;
         x[which(!is.na(x))] <- result.na;
         x;
         }
