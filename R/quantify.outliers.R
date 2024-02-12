@@ -139,13 +139,13 @@ quantify.outliers <- function(x, method = 'mean', trim = 0, nstart = 1, exclude.
             top.patient <- round(length(gene.order.nonzero) * trim, digit = 0);
             low.patient <- round(length(gene.order.nonzero) * (1 - trim), digit = 0);
             data.mean <- mean(gene.order.nonzero, trim = trim);
-            data.sd <- sd(gene.order.nonzero[(top.patient+1):(low.patient)]);
+            data.sd <- sd(gene.order.nonzero[(top.patient + 1):(low.patient)]);
             }
         else {
             top.patient <- round(length(x.na) * trim, digit = 0);
             low.patient <- round(length(x.na) * (1 - trim), digit = 0);
             data.mean <- mean(gene.order, trim = trim);
-            data.sd <- sd(gene.order[(top.patient+1):(low.patient)]);
+            data.sd <- sd(gene.order[(top.patient + 1):(low.patient)]);
             }
         result.na <- (x.na - data.mean) / data.sd;
         x[which(!is.na(x))] <- result.na;
