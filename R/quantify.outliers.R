@@ -73,6 +73,8 @@
 #'     method = 'kmean',
 #'     exclude.zero = TRUE
 #'     );
+#'
+#' @noRd
 quantify.outliers <- function(x, method = 'mean', trim = 0, nstart = 1, exclude.zero = FALSE) {
     x.na <- na.omit(as.numeric(x));
     if ('median' == method) {

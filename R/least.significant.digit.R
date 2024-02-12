@@ -9,6 +9,8 @@
 #' least.significant.digit(
 #'     x = c(0.2, 0.03, 0.004, 0.05)
 #'     );
+#'
+#' @noRd
 least.significant.digit <- function(x) {
     decimal.number.max <- sapply(
         X = na.omit(x),
