@@ -6,11 +6,13 @@
 #' @return `x`, with the range of `x` appended to the end.  The result retains `names(x)`, and the added element is named `'zrange'`.
 #'
 #' @examples
-#' set.seed(123);
+#' set.seed(1234);
+#' x <- rnorm(
+#'     n = 10
+#'     );
+#' names(x) <- letters[1:length(x)];
 #' outlier.detection.zrange(
-#'     x = rnorm(
-#'         n = 10
-#'         )
+#'     x = x
 #'     );
 #'
 #' @noRd
