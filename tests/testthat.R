@@ -1,4 +1,4 @@
 library(testthat);
-library(BoutrosLabTemplate);
+library(OutlierDetectionAlgorithm);
 
-test_check('BoutrosLabTemplate');
+test_check('OutlierDetectionAlgorithm');
