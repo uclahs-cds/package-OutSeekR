@@ -260,7 +260,7 @@ cosine.similarity.large.value.percent <- function(x, y, large.value.percent) {
 #'     );
 #'
 #' @noRd
-outlier.detection.cosine <- function (x, distribution, value.portion = 1) {
+outlier.detection.cosine <- function(x, distribution, value.portion = 1) {
     # Define a minimum value to ensure the values in `x` are strictly
     # positive.
     add.minimum.value <- least.significant.digit(
