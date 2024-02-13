@@ -136,15 +136,33 @@ quantify.outliers <- function(x, method = 'mean', trim = 0, nstart = 1, exclude.
         gene.order <- x.na[order(x.na, decreasing = TRUE)];
         if (exclude.zero) {
             gene.order.nonzero <- gene.order[0 != gene.order];
-            top.patient <- round(length(gene.order.nonzero) * trim, digit = 0);
-            low.patient <- round(length(gene.order.nonzero) * (1 - trim), digit = 0);
-            data.mean <- mean(gene.order.nonzero, trim = trim);
+            top.patient <- round(
+                x = length(gene.order.nonzero) * trim,
+                digits = 0
+                );
+            low.patient <- round(
+                x = length(gene.order.nonzero) * (1 - trim),
+                digits = 0
+                );
+            data.mean <- mean(
+                x = gene.order.nonzero,
+                trim = trim
+                );
             data.sd <- sd(gene.order.nonzero[(top.patient + 1):(low.patient)]);
             }
         else {
-            top.patient <- round(length(x.na) * trim, digit = 0);
-            low.patient <- round(length(x.na) * (1 - trim), digit = 0);
-            data.mean <- mean(gene.order, trim = trim);
+            top.patient <- round(
+                x = length(x.na) * trim,
+                digits = 0
+                );
+            low.patient <- round(
+                x = length(x.na) * (1 - trim),
+                digits = 0
+                );
+            data.mean <- mean(
+                x = gene.order,
+                trim = trim
+                );
             data.sd <- sd(gene.order[(top.patient + 1):(low.patient)]);
             }
         result.na <- (x.na - data.mean) / data.sd;
