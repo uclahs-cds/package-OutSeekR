@@ -15,6 +15,6 @@ jobs:
       steps:
          - uses: actions/checkout@v2
            with:
-              path: BoutrosLabTemplate
-         - run: R CMD build --compact-vignettes="gs+qpdf" BoutrosLabTemplate
-         - run: R CMD check --as-cran --run-donttest BoutrosLabTemplate_*.tar.gz
+              path: OutlierDetectionAlgorithm
+         - run: R CMD build --compact-vignettes="gs+qpdf" OutlierDetectionAlgorithm
+         - run: R CMD check --as-cran --run-donttest OutlierDetectionAlgorithm_*.tar.gz
