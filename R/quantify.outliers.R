@@ -76,16 +76,16 @@
 #'
 #' @noRd
 quantify.outliers <- function(x, method = 'mean', trim = 0, nstart = 1, exclude.zero = FALSE) {
-    x.na <- na.omit(as.numeric(x));
+    x.na <- stats::na.omit(x);
     if ('median' == method) {
         if (exclude.zero) {
             x.nonzero <- x.na[0 != x.na];
-            data.median <- median(x.nonzero);
-            data.mad <- mad(x.nonzero);
+            data.median <- stats::median(x.nonzero);
+            data.mad <- stats::mad(x.nonzero);
             }
         else {
-            data.median <- median(x.na);
-            data.mad <- mad(x.na);
+            data.median <- stats::median(x.na);
+            data.mad <- stats::mad(x.na);
             }
         result.na <- (x.na - data.median) / data.mad;
         x[which(!is.na(x))] <- result.na;
@@ -107,7 +107,11 @@ quantify.outliers <- function(x, method = 'mean', trim = 0, nstart = 1, exclude.
                     names(kmeans.matrix) <- names(x.na);
                     }
                 else {
-                    kmeans <- kmeans(non.zero, 2, nstart = nstart);
+                    kmeans <- stats::kmeans(
+                        x = non.zero,
+                        centers = 2,
+                        nstart = nstart
+                        );
                     cluster <- kmeans$cluster;
                     cluster.zero <- c(cluster, rep(0, length(x[0 == x])));
                     kmeans.matrix <- cluster.zero[match(x.na, data.order)];
@@ -122,7 +126,11 @@ quantify.outliers <- function(x, method = 'mean', trim = 0, nstart = 1, exclude.
                 names(kmeans.matrix) <- names(x.na);
                 }
             else {
-                kmeans <- kmeans(x.na, 2, nstart = nstart);
+                kmeans <- stats::kmeans(
+                    x = x.na,
+                    centers = 2,
+                    nstart = nstart
+                    );
                 cluster <- kmeans$cluster;
                 kmeans.matrix <- cluster;
                 names(kmeans.matrix) <- names(x.na);
@@ -148,7 +156,7 @@ quantify.outliers <- function(x, method = 'mean', trim = 0, nstart = 1, exclude.
                 x = gene.order.nonzero,
                 trim = trim
                 );
-            data.sd <- sd(gene.order.nonzero[(top.patient + 1):(low.patient)]);
+            data.sd <- stats::sd(gene.order.nonzero[(top.patient + 1):(low.patient)]);
             }
         else {
             top.patient <- round(
@@ -163,7 +171,7 @@ quantify.outliers <- function(x, method = 'mean', trim = 0, nstart = 1, exclude.
                 x = gene.order,
                 trim = trim
                 );
-            data.sd <- sd(gene.order[(top.patient + 1):(low.patient)]);
+            data.sd <- stats::sd(gene.order[(top.patient + 1):(low.patient)]);
             }
         result.na <- (x.na - data.mean) / data.sd;
         x[which(!is.na(x))] <- result.na;
