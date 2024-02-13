@@ -13,7 +13,7 @@
 #' @noRd
 least.significant.digit <- function(x) {
     decimal.number.max <- sapply(
-        X = na.omit(x),
+        X = stats::na.omit(x),
         FUN = function(y) {
             decimal.numbers <- sapply(
                 X = y,
