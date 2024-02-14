@@ -181,69 +181,12 @@ quantify.outliers <- function(x, method = 'mean', trim = 0, nstart = 1, exclude.
 
 #' Cosine similarity
 #'
-#' Compute the cosine similarity between pairs of values.
-#'
-#' @param x A number.
-#' @param y A number.
-#' @param large.value.percent The percentage of values to use in the calculation.  Values are selected starting with the maximums.  `large.value.percent = 0` compares only the maximums.
-#'
-#' @return A number.
-#'
-#' #' # Generate input data.
-#' set.seed(1234);
-#' x <- rgamma(
-#'     n = 20,
-#'     shape = 2,
-#'     scale = 2
-#'     );
-#' y <- seq(
-#'     from = 0.5,
-#'     to = 20,
-#'     by = 0.5
-#'     );
-#' cosine.similarity.large.value.percent(
-#'     x = x,
-#'     y = y,
-#'     large.value.percent = 10
-#'     );
-#'
-#' @noRd
-cosine.similarity.large.value.percent <- function(x, y, large.value.percent) {
-    if (0 == large.value.percent) {
-        large.value.number.integer <- 1;
-        }
-    else {
-        large.value.number <- length(x) * (large.value.percent / 100);
-        large.value.number.integer <- round(large.value.number);
-        }
-    # Subset to the largest values.
-    indices.for.comparison <- (length(x) - large.value.number.integer + 1):length(x);
-    observed.value <- sort(y);
-    theoretical.value <- sort(x);
-    mid.value <- c(1, 1);
-    value.x.y <- data.frame(theoretical.value, observed.value);
-
-    # Calculate cosine similarity.
-    cosine.large.value <- future.apply::future_sapply(
-        X = indices.for.comparison,
-        FUN = function(i) {
-            lsa::cosine(
-                x = as.numeric(value.x.y[i, ]), mid.value
-                );
-            }
-        );
-    cosine.large.value;
-    }
-
-#' Compute cosine similarity for detection of outliers
-#'
-#' Generate theoretical quantiles based on the optimal distribution of the data, and compute cosine similarity between the data and quantiles.
+#' Compute cosine similarity for detection of outliers.  Generate theoretical quantiles based on the optimal distribution of the data, and compute cosine similarity between a point made up of the largest observed quantile and the largest theoretical quantile and a point on the line y = x.
 #' .
 #' @param x A numeric vector.
 #' @param distribution A numeric code corresponding to the optimal distribution of `x` as returned by `identify.bic.optimal.data.distribution()`.
-#' @param value.portion The percentage of values to use in the calculation of cosine similarity.  Values are selected starting with the maximum.  `value.portion = 0` uses only the maximum.  The default is to use the largest 1% of values.
 #'
-#' @return A numeric vector containing the cosine similarity value(s) along with the distribution code.
+#' @return A number.
 #'
 #' @examples
 #' # Generate fake data.
@@ -255,12 +198,11 @@ cosine.similarity.large.value.percent <- function(x, y, large.value.percent) {
 #'     );
 #' outlier.detection.cosine(
 #'     x = x,
-#'     distribution = 4,
-#'     value.portion = 0
+#'     distribution = 4
 #'     );
 #'
 #' @noRd
-outlier.detection.cosine <- function(x, distribution, value.portion = 1) {
+outlier.detection.cosine <- function(x, distribution) {
     # Define a minimum value to ensure the values in `x` are strictly
     # positive.
     add.minimum.value <- least.significant.digit(
@@ -282,22 +224,18 @@ outlier.detection.cosine <- function(x, distribution, value.portion = 1) {
     if (1 == distribution) {
         norm.mean <- mean(x.nozero.trim);
         norm.sd <- stats::sd(x.nozero.trim);
-        # Use truncated norm
-        norm.quantiles <- truncnorm::qtruncnorm(
-            p,
+        # For a normal distribution, generate quantiles from a
+        # truncated normal distribution.
+        theoretical.quantiles <- truncnorm::qtruncnorm(
+            p = p,
             a = 0,
             b = Inf,
             mean = norm.mean,
             sd = norm.sd
             );
-        obs.quantile.norm <- stats::quantile(
+        observed.quantiles <- stats::quantile(
             x = x.nozero,
             probs = p
-            );
-        last.cos <- cosine.similarity.large.value.percent(
-            x = norm.quantiles,
-            y = obs.quantile.norm,
-            large.value.percent = value.portion
             );
         }
     else if (2 == distribution) {
@@ -305,35 +243,25 @@ outlier.detection.cosine <- function(x, distribution, value.portion = 1) {
         sd.log <- stats::sd(x.nozero.trim);
         m2 <-  log(mean.log^2 / sqrt(sd.log^2 + mean.log^2));
         sd2 <- sqrt(log(1 + (sd.log^2 / mean.log^2)));
-        lnorm.quantile <- stats::qlnorm(
+        theoretical.quantiles <- stats::qlnorm(
             p = p,
             meanlog = m2,
             sdlog = sd2
             );
-        obs.quantile.lnorm <- stats::quantile(
+        observed.quantiles <- stats::quantile(
             x = x.nozero,
             probs = p
-            );
-        last.cos <- cosine.similarity.large.value.percent(
-            x = lnorm.quantile,
-            y = obs.quantile.lnorm,
-            large.value.percent = value.portion
             );
         }
     else if (3 == distribution) {
         exp.rate <- 1 / mean(x.nozero.trim);
-        exp.quantile <- stats::qexp(
+        theoretical.quantiles <- stats::qexp(
             p = p,
             rate = exp.rate
             );
-        obs.quantile.exp <- stats::quantile(
+        observed.quantiles <- stats::quantile(
             x = x.nozero,
             probs = p
-            );
-        last.cos <- cosine.similarity.large.value.percent(
-            x = exp.quantile,
-            y = obs.quantile.exp,
-            large.value.percent = value.portion
             );
         }
     else if (4 == distribution) {
@@ -341,22 +269,19 @@ outlier.detection.cosine <- function(x, distribution, value.portion = 1) {
         sd.gamma <- stats::sd(x.nozero.trim);
         gamma.shape <- (mean.gamma / sd.gamma)^2;
         gamma.rate <- mean.gamma / (sd.gamma^2);
-        gamma.quantile <- stats::qgamma(
+        theoretical.quantiles <- stats::qgamma(
             p = p,
             shape = gamma.shape,
             rate = gamma.rate
             );
-        obs.quantile.gamma <- stats::quantile(
+        observed.quantiles <- stats::quantile(
             x = x.nozero,
             probs = p
             );
-        last.cos <- cosine.similarity.large.value.percent(
-            x = gamma.quantile,
-            y = obs.quantile.gamma,
-            large.value.percent = value.portion
-            );
         }
-
-    cosine.sum.distribution.fit <- c(last.cos, distribution);
-    cosine.sum.distribution.fit;
+    cosine.similarity <- lsa::cosine(
+        x = c(theoretical.quantiles[length(p)], observed.quantiles[length(p)]),
+        y = c(1, 1)
+        );
+    cosine.similarity[1, 1];
     }
