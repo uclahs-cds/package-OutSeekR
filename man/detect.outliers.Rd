@@ -6,6 +6,9 @@
 \usage{
 detect.outliers(data)
 }
+\arguments{
+\item{data}{A matrix or data frame of FPKM values, organized with transcripts on rows and samples on columns.  Transcript identifiers should be stored as \code{rownames(data)}.}
+}
 \description{
 Detect outliers
 }
