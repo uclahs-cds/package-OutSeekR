@@ -45,42 +45,30 @@ detect.outliers <- function(data) {
         nstart = 1000,
         future.seed = TRUE
         );
-    # Transpose so the rows and columns in the computed quantities
-    # match those in the original data.
-    data.mean <- t(data.mean);
-    data.median <- t(data.median);
-    data.trimmean <- t(data.trimmean);
-    data.kmeans <- t(data.kmeans);
     # Compute the ranges of the z-score statistics.
-    data.zrange.mean <- future.apply::future_apply(
+    zrange.mean <- future.apply::future_apply(
         X = data.mean,
-        MARGIN = 1,
-        FUN = outlier.detection.zrange
+        MARGIN = 2,
+        FUN = zrange
         );
-    data.zrange.median <- future.apply::future_apply(
+    zrange.median <- future.apply::future_apply(
         X = data.median,
-        MARGIN = 1,
-        FUN = outlier.detection.zrange
+        MARGIN = 2,
+        FUN = zrange
         );
-    data.zrange.trimmean <- future.apply::future_apply(
+    zrange.trimmean <- future.apply::future_apply(
         X = data.trimmean,
-        MARGIN = 1,
-        FUN = outlier.detection.zrange
+        MARGIN = 2,
+        FUN = zrange
         );
     # Compute the k-means fraction.
-    data.fraction.kmeans <- future.apply::future_apply(
+    fraction.kmeans <- future.apply::future_apply(
         X = data.kmeans,
-        MARGIN = 1,
-        FUN = outlier.detection.kmeans
+        MARGIN = 2,
+        FUN = kmeans.fraction
         );
-    # Transpose so the rows and columns in the computed quantities
-    # match those in the original data.
-    data.zrange.mean <- t(data.zrange.mean);
-    data.zrange.median <- t(data.zrange.median);
-    data.zrange.trimmean <- t(data.zrange.trimmean);
-    data.fraction.kmeans <- t(data.fraction.kmeans);
     # Compute the cosine similarity.
-    data.cosine <- future.apply::future_sapply(
+    cosine.similarity <- future.apply::future_sapply(
         X = seq_len(nrow(data)),
         FUN = function(i) {
             outlier.detection.cosine(
@@ -89,15 +77,15 @@ detect.outliers <- function(data) {
                 );
             }
         );
-    names(data.cosine) <- rownames(data);
+    names(cosine.similarity) <- rownames(data);
     # Assemble the statistics from the five methods into a single
     # matrix.
     observed.5method <- cbind(
-        zrange.mean = data.zrange.mean[, 'zrange'],
-        zrange.median = data.zrange.median[, 'zrange'],
-        zrange.trimmean = data.zrange.trimmean[, 'zrange'],
-        fraction.kmeans = data.fraction.kmeans[, 'fraction'],
-        cosine = data.cosine
+        zrange.mean = zrange.mean,
+        zrange.median = zrange.median,
+        zrange.trimmean = zrange.trimmean,
+        fraction.kmeans = fraction.kmeans,
+        cosine.similarity = cosine.similarity
         );
 
     list(
@@ -106,11 +94,11 @@ detect.outliers <- function(data) {
         data.median = data.median,
         data.trimmean = data.trimmean,
         data.kmeans = data.kmeans,
-        data.zrange.mean = data.zrange.mean,
-        data.zrange.median = data.zrange.median,
-        data.zrange.trimmean = data.zrange.trimmean,
-        data.fraction.kmeans = data.fraction.kmeans,
-        data.cosine = data.cosine,
+        zrange.mean = zrange.mean,
+        zrange.median = zrange.median,
+        zrange.trimmean = zrange.trimmean,
+        fraction.kmeans = fraction.kmeans,
+        cosine.similarity = cosine.similarity,
         observed.5method = observed.5method
         );
     }

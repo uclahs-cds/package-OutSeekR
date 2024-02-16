@@ -1,11 +1,11 @@
-#' Add k-means fraction to data
+#' k-means fraction
 #'
 #' Given a vector of cluster assigments from `quantify.outliers()` run with `method = 'kmeans'`, compute the fraction of observations belonging to the smaller of the two clusters.
 #'
 #' @details This function only considers clusters 1 and 2 even if `quantify.outliers()` was run with `exclude.zero = TRUE`.  In that case, zeros are effectively excluded from the counts used to define the k-means fraction.  See examples.
 #'
-#' @param x A numeric vector
-#' @return `x`, with the range of `x` appended to the end.  The result retains `names(x)`, and the added element is named `'fraction'`.
+#' @param x A numeric vector.
+#' @return A number.
 #'
 #' @examples
 #' x <- c(1, 1, 2, 2, 2, 2, 2, 2, 2, 2);
@@ -17,13 +17,12 @@
 #' # If `quantify.outliers` was run with `exclude.zero = TRUE`, zero
 #' # values are ignored in the calculation of the k-means fraction.
 #' x <- c(0, 1, 2, 2, 2, 2, 2, 2, 2, 2);
-#' names(x) <- letters[1:length(x)];
 #' outlier.detection.kmeans(
 #'     x = x
 #'     );
 #'
 #' @noRd
-outlier.detection.kmeans <- function(x) {
+kmeans.fraction <- function(x) {
     if (1 == length(unique(x))) {
         fraction <- NA;
         }
@@ -37,7 +36,5 @@ outlier.detection.kmeans <- function(x) {
             digits = 4
             );
         }
-    x.with.fraction <- c(x, fraction);
-    names(x.with.fraction) <- c(names(x), 'fraction');
-    x.with.fraction;
+    fraction;
     }
