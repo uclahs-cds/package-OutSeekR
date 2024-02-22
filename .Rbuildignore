@@ -1,3 +1,7 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-.github
+\.github/
+^LICENSE\.md$
+^README\.md$
+metadata.yaml
+.cicd-env
