@@ -10,7 +10,61 @@
 #' * 4 = gamma.
 #' @param num.null The number of simulated transcripts to generate.
 #'
-#' @return A matrix of simulated transcripts with `num.null` rows and `ncol(data)` columns.  Row names are retained, but column names are not.
+#' @return A matrix of simulated transcripts with `num.null` rows and `ncol(data)` columns.  Row names are retained from `data` and correspond to the row names of the transcripts used to simulate each row.  Column names are not retained.
+#'
+#' @examples
+#' # Prepare fake data.
+#' set.seed(1234);
+#' n <- 25;
+#' x1 <- rnorm(
+#'     n = n,
+#'     mean = 5,
+#'     sd = 2
+#'     );
+#' x2 <- rlnorm(
+#'     n = n,
+#'     meanlog = 0,
+#'     sdlog = 0.5
+#'     );
+#' x3 <- rexp(
+#'     n = n,
+#'     rate = 0.2
+#'     );
+#' x4 <- rexp(
+#'     n = n,
+#'     rate = 0.1
+#'     );
+#' x5 <- rgamma(
+#'     n = n,
+#'     shape = 2,
+#'     scale = 2
+#'     );
+#' x6 <- rgamma(
+#'     n = n,
+#'     shape = 4,
+#'     scale = 0.5
+#'     );
+#' x <- rbind(x1, x2, x3, x4, x5, x6);
+#' rownames(x) <- letters[seq_len(nrow(x))];
+#' colnames(x) <- paste(
+#'      'Sample',
+#'      seq_len(ncol(x)),
+#'      sep = '.'
+#'      );
+#' 
+#' # Identify optimal distributions for each transcript.
+#' optimal.distribution.x <- apply(
+#'     X = x,
+#'     MARGIN = 1,
+#'     FUN = identify.bic.optimal.data.distribution
+#'     );
+#' 
+#' # Simulate from null distributions.
+#' simulated.x <- simulate.null(
+#'     data = x,
+#'     distributions = optimal.distribution.x,
+#'     num.null = 100
+#'     );
 #'
 #' @noRd
 simulate.null <- function(
@@ -90,4 +144,3 @@ simulate.null <- function(
     rownames(simulated.null) <- rownames(data)[sampled.indices];
     simulated.null;
     }
-
