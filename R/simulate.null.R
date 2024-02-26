@@ -98,7 +98,7 @@ simulate.null <- function(
             if (1 == distribution) {
                 norm.mean <- mean(x.nozero.trim);
                 norm.sd <- stats::sd(x.trim);
-                simulated.null <- extraDistr::rtnorm(
+                simulated.null <- truncnorm::rtruncnorm(
                     n = length(x),
                     mean = norm.mean,
                     sd = norm.sd,
