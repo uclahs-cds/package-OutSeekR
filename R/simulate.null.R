@@ -43,8 +43,8 @@ simulate.null <- function(
             # distribution for this transcript.
             if (1 == distribution) {
                 norm.mean <- mean(x.nozero.trim);
-                norm.sd <- sd(x.trim);
-                simulated.null <- rtnorm(
+                norm.sd <- stats::sd(x.trim);
+                simulated.null <- extraDistr::rtnorm(
                     n = length(x),
                     mean = norm.mean,
                     sd = norm.sd,
@@ -53,10 +53,10 @@ simulate.null <- function(
                 }
             else if (2 == distribution) {
                 mean.log <- mean(x.nozero.trim);
-                sd.log <- sd(x.nozero.trim);
+                sd.log <- stats::sd(x.nozero.trim);
                 m2 <-  log(mean.log^2 / sqrt(sd.log^2 + mean.log^2));
                 sd2 <- sqrt(log(1 + (sd.log^2 / mean.log^2)));
-                simulated.null <- rlnorm(
+                simulated.null <- stats::rlnorm(
                     n = length(x),
                     meanlog = m2,
                     sdlog = sd2
@@ -64,17 +64,17 @@ simulate.null <- function(
                 }
             else if (3 == distribution) {
                 exp.rate <- 1 / mean(x.nozero.trim);
-                simulated.null <- rexp(
+                simulated.null <- stats::rexp(
                     n = length(x),
                     rate = exp.rate
                     );
                 }
             else if (4 == distribution) {
                 mean.gamma <- mean(x.nozero.trim);
-                sd.gamma <- sd(x.nozero.trim);
+                sd.gamma <- stats::sd(x.nozero.trim);
                 gamma.shape <- (mean.gamma/sd.gamma)^2;
                 gamma.rate <- mean.gamma/(sd.gamma^2);
-                simulated.null <- rgamma(
+                simulated.null <- stats::rgamma(
                     n = length(x),
                     shape = gamma.shape,
                     rate = gamma.rate
