@@ -129,6 +129,14 @@ detect.outliers <- function(data, num.null) {
         num.allowed.NA = 0
         );
 
+    # Generate a matrix of null transcripts by simulating from their
+    # respective optimal distributions.
+    null.data <- simulate.null(
+        data = data,
+        distributions = optimal.distribution.data,
+        num.null = num.null
+        );
+
     list(
         optimal.distribution.data = optimal.distribution.data,
         optimal.distribution.residuals = optimal.distribution.residuals,
@@ -143,6 +151,7 @@ detect.outliers <- function(data, num.null) {
         cosine.similarity = cosine.similarity,
         observed.5method = observed.5method,
         observed.5method.ranks = observed.5method.ranks,
-        observed.5method.rank.product = observed.5method.rank.product
+        observed.5method.rank.product = observed.5method.rank.product,
+        null.data = null.data
         );
     }
