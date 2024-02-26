@@ -69,7 +69,7 @@ calculate.residuals <- function(x, distribution) {
         sd.log <- stats::sd(x.nozero.trim);
         m2 <-  log(mean.log^2 / sqrt(sd.log^2 + mean.log^2));
         sd2 <- sqrt(log(1 + (sd.log^2 / mean.log^2)));
-        theoretical.quantiles <- qlnorm(
+        theoretical.quantiles <- stats::qlnorm(
             p = p,
             meanlog = m2,
             sdlog = sd2
@@ -87,7 +87,7 @@ calculate.residuals <- function(x, distribution) {
         sd.gamma <- stats::sd(x.nozero.trim);
         gamma.shape <- (mean.gamma / sd.gamma)^2;
         gamma.rate <- mean.gamma / (sd.gamma^2);
-        theoretical.quantiles <- qgamma(
+        theoretical.quantiles <- stats::qgamma(
             p = p,
             shape = gamma.shape,
             rate = gamma.rate
