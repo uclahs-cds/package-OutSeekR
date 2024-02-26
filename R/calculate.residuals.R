@@ -3,7 +3,11 @@
 #' Calculate residuals between quantiles of the input and quantiles of one of four distributions: normal, log-normal, exponential, or gamma.
 #'
 #' @param x A numeric vector.
-#' @param distribution A numeric vector consisting of codes corresponding to the optimal distribution of `x` as returned by, e.g., `identify.bic.optimal.data.distribution()`.
+#' @param distribution A number corresponding to the optimal distribution of `x` as returned by, e.g., `identify.bic.optimal.data.distribution()`.  One of
+#' * 1 = normal,
+#' * 2 = log-normal,
+#' * 3 = exponential, and
+#' * 4 = gamma.
 #'
 #' @return A numeric vector of the same length as `x`.  Names are not retained.
 #'
