@@ -15,12 +15,13 @@ detect.outliers <- function(data, num.null) {
         future.seed = TRUE
         );
     # Calculate residuals of the observed data with respect to the
-    # optimal distribution.
+    # optimal distribution.  (We use `as.numeric()` on the input to
+    # `calculate.residuals()` in order to handle data frame input.
     observed.residuals <- future.apply::future_lapply(
         X = seq_len(nrow(data)),
         FUN = function(i) {
             calculate.residuals(
-                x = data[i, ],
+                x = as.numeric(data[i, ]),
                 distribution = optimal.distribution.data[i]
                 );
             }
