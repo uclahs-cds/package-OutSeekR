@@ -85,7 +85,7 @@ simulate.null <- function(
         FUN = function(i) {
             # Select the corresponding transcript and the code for its
             # optimal distribution.
-            x <- data[i, ];
+            x <- as.numeric(data[i, ]);
             distribution <- distributions[i];
             # Ensure the values in `x` are strictly positive.
             add.minimum.value <- least.significant.digit(x);
