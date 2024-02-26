@@ -1,9 +1,10 @@
 #' Detect outliers
 #'
 #' @param data A matrix or data frame of FPKM values, organized with transcripts on rows and samples on columns.  Transcript identifiers should be stored as `rownames(data)`.
+#' @param num.null The number of transcripts to generate when simulating from null distributions.
 #'
 #' @export
-detect.outliers <- function(data) {
+detect.outliers <- function(data, num.null) {
     # Determine which of the normal, log-normal, exponential, or gamma
     # distributions provides the best fit to each row of values in
     # `data`.
