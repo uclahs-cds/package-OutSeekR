@@ -87,6 +87,15 @@ detect.outliers <- function(data) {
         fraction.kmeans = fraction.kmeans,
         cosine.similarity = cosine.similarity
         );
+    # Assign ranks within each method.
+    observed.5method.ranks <- outlier.rank(
+        outlier.statistics.matrix = observed.5method
+        );
+    # Compute the rank product for each transcript.
+    observed.5method.rank.product <- outlier.rank.product(
+        ranks.matrix = observed.5method.ranks,
+        num.allowed.NA = 0
+        );
 
     list(
         optimal.distribution.data = optimal.distribution.data,
@@ -99,6 +108,8 @@ detect.outliers <- function(data) {
         zrange.trimmean = zrange.trimmean,
         fraction.kmeans = fraction.kmeans,
         cosine.similarity = cosine.similarity,
-        observed.5method = observed.5method
+        observed.5method = observed.5method,
+        observed.5method.ranks = observed.5method.ranks,
+        observed.5method.rank.product = observed.5method.rank.product
         );
     }
