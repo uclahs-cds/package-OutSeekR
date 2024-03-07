@@ -263,6 +263,10 @@ detect.outliers <- function(data, num.null) {
         observed.5method = observed.5method,
         observed.5method.ranks = observed.5method.ranks,
         observed.5method.rank.product = observed.5method.rank.product,
-        null.data = null.data
+        null.data = null.data,
+        optimal.distribution.null.data = optimal.distribution.null.data,
+        null.5method = null.5method,
+        null.5method.ranks = null.5method.ranks,
+        null.5method.rank.product = null.5method.rank.product
         );
     }
