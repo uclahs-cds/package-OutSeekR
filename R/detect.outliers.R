@@ -151,7 +151,7 @@ detect.outliers <- function(data, num.null) {
         );
     null.data <- do.call(
         what = rbind,
-        args = null
+        args = null.data
         );
 
     list(
