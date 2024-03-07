@@ -132,10 +132,26 @@ detect.outliers <- function(data, num.null) {
 
     # Generate a matrix of null transcripts by simulating from their
     # respective optimal distributions.
-    null.data <- simulate.null(
-        data = data,
-        distributions = optimal.distribution.data,
-        num.null = num.null
+    sampled.indices <- sample(
+        x = nrow(data),
+        size = num.null,
+        replace = TRUE
+        );
+    null.data <- future.apply::future_lapply(
+        X = sampled.indices,
+        FUN = function(i) {
+            simulate.null(
+                x = as.numeric(data[i, ]),
+                x.distribution = optimal.distribution.data[i],
+                r = as.numeric(observed.residuals.trimmed[i, ]),
+                r.distribution = optimal.distribution.residuals[i]
+                );
+            },
+        future.seed = TRUE
+        );
+    null.data <- do.call(
+        what = rbind,
+        args = null
         );
 
     list(
