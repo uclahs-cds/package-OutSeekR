@@ -154,6 +154,15 @@ detect.outliers <- function(data, num.null) {
         args = null.data
         );
     rownames(null.data) <- rownames(data)[sampled.indices];
+    # Determine which of the normal, log-normal, exponential, or gamma
+    # distributions provides the best fit to each row of values in
+    # `null.data`.
+    optimal.distribution.null.data <- future.apply::future_apply(
+        X = null.data,
+        MARGIN = 1,
+        FUN = identify.bic.optimal.data.distribution,
+        future.seed = TRUE
+        );
 
     list(
         optimal.distribution.data = optimal.distribution.data,
