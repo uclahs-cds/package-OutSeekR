@@ -153,6 +153,7 @@ detect.outliers <- function(data, num.null) {
         what = rbind,
         args = null.data
         );
+    rownames(null.data) <- rownames(data)[sampled.indices];
 
     list(
         optimal.distribution.data = optimal.distribution.data,
