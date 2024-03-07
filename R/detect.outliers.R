@@ -229,6 +229,25 @@ detect.outliers <- function(data, num.null) {
             }
         );
     names(cosine.similarity) <- rownames(null.data);
+    # Assemble the statistics from the five methods into a single
+    # matrix.
+    null.5method <- cbind(
+        zrange.mean = zrange.mean,
+        zrange.median = zrange.median,
+        zrange.trimmean = zrange.trimmean,
+        fraction.kmeans = fraction.kmeans,
+        cosine.similarity = cosine.similarity
+        );
+    # Assign ranks within each method.
+    null.5method.ranks <- outlier.rank(
+        outlier.statistics.matrix = null.5method
+        );
+    # Compute the rank product for each null transcript.
+    null.5method.rank.product <- outlier.rank.product(
+        ranks.matrix = null.5method.ranks,
+        num.allowed.NA = 0
+        );
+
     list(
         optimal.distribution.data = optimal.distribution.data,
         optimal.distribution.residuals = optimal.distribution.residuals,
