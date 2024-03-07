@@ -164,6 +164,71 @@ detect.outliers <- function(data, num.null) {
         future.seed = TRUE
         );
 
+    # Compute quantities for outlier detection on the null data: (1)
+    # z-scores based on the mean / standard deviation, (2) z-scores
+    # based on the trimmed mean / trimmed standard deviation, (3)
+    # z-scores based on the median / median absolute deviation, and
+    # (4) the cluster assignment from k-means with two clusters.
+    data.mean <- future.apply::future_apply(
+        X = null.data,
+        MARGIN = 1,
+        FUN = quantify.outliers,
+        method = 'mean'
+        );
+    data.median <- future.apply::future_apply(
+        X = null.data,
+        MARGIN = 1,
+        FUN = quantify.outliers,
+        method = 'median'
+        );
+    data.trimmean <- future.apply::future_apply(
+        X = null.data,
+        MARGIN = 1,
+        FUN = quantify.outliers,
+        method = 'mean',
+        trim = 0.05
+        );
+    data.kmeans <- future.apply::future_apply(
+        X = null.data,
+        MARGIN = 1,
+        FUN = quantify.outliers,
+        method = 'kmeans',
+        nstart = 1000,
+        future.seed = TRUE
+        );
+    # Compute the ranges of the z-score statistics.
+    zrange.mean <- future.apply::future_apply(
+        X = data.mean,
+        MARGIN = 2,
+        FUN = zrange
+        );
+    zrange.median <- future.apply::future_apply(
+        X = data.median,
+        MARGIN = 2,
+        FUN = zrange
+        );
+    zrange.trimmean <- future.apply::future_apply(
+        X = data.trimmean,
+        MARGIN = 2,
+        FUN = zrange
+        );
+    # Compute the k-means fraction.
+    fraction.kmeans <- future.apply::future_apply(
+        X = data.kmeans,
+        MARGIN = 2,
+        FUN = kmeans.fraction
+        );
+    # Compute the cosine similarity.
+    cosine.similarity <- future.apply::future_sapply(
+        X = seq_len(nrow(null.data)),
+        FUN = function(i) {
+            outlier.detection.cosine(
+                x = as.numeric(null.data[i, ]),
+                distribution = optimal.distribution.null.data[i]
+                );
+            }
+        );
+    names(cosine.similarity) <- rownames(null.data);
     list(
         optimal.distribution.data = optimal.distribution.data,
         optimal.distribution.residuals = optimal.distribution.residuals,
