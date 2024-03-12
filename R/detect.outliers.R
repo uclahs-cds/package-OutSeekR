@@ -238,15 +238,6 @@ detect.outliers <- function(data, num.null) {
         fraction.kmeans = fraction.kmeans,
         cosine.similarity = cosine.similarity
         );
-    # Assign ranks within each method.
-    null.5method.ranks <- outlier.rank(
-        outlier.statistics.matrix = null.5method
-        );
-    # Compute the rank product for each null transcript.
-    null.5method.rank.product <- outlier.rank.product(
-        ranks.matrix = null.5method.ranks,
-        num.allowed.NA = 0
-        );
 
     list(
         optimal.distribution.data = optimal.distribution.data,
@@ -265,8 +256,6 @@ detect.outliers <- function(data, num.null) {
         observed.5method.rank.product = observed.5method.rank.product,
         null.data = null.data,
         optimal.distribution.null.data = optimal.distribution.null.data,
-        null.5method = null.5method,
-        null.5method.ranks = null.5method.ranks,
-        null.5method.rank.product = null.5method.rank.product
+        null.5method = null.5method
         );
     }
