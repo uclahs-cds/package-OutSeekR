@@ -63,6 +63,24 @@ outlier.rank <- function(outlier.statistics.matrix) {
     ranks.matrix;
     }
 
+outlier.rank2 <- function(outlier.statistic, method) {
+    if (method %in% c('zrange.mean', 'zrange.median', 'zrange.trimmean')) {
+        ranks <- rank(
+            x = -outlier.statistic,
+            na.last = 'keep',
+            ties.method = 'max'
+            );
+        }
+    else if (method %in% c('fraction.kmeans', 'cosine.similarity')) {
+        ranks <- rank(
+            x = outlier.statistic,
+            na.last = 'keep',
+            ties.method = 'max'
+            );
+        }
+    ranks;
+    }
+
 #' Rank product of outlier statistics
 #'
 #' Given a matrix of ranks of outlier statistics, organized with transcripts on rows and outlier statistics on columns, return the products of the ranks across each transcript.
