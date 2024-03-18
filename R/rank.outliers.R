@@ -158,3 +158,34 @@ outlier.rank.product <- function(ranks.matrix, num.allowed.NA = 0) {
     rank.product[num.NA > num.allowed.NA] <- NA;
     rank.product^(1 / (ncol(ranks.matrix) - num.NA));
     }
+
+outlier.rank.product2 <- function(
+    zrange.mean,
+    zrange.median,
+    zrange.trimmean,
+    fraction.kmeans,
+    cosine.similarity,
+    num.allowed.NA = 0
+    ) {
+    num.NA <- future.apply::future_mapply(
+        FUN = function(x1, x2, x3, x4, x5) {
+            sum(c(is.na(x1), is.na(x2), is.na(x3), is.na(x4), is.na(x5)))
+            },
+        zrange.mean,
+        zrange.median,
+        zrange.trimmean,
+        fraction.kmeans,
+        cosine.similarity
+        );
+    rank.product <- future.apply::future_mapply(
+        FUN = prod,
+        zrange.mean,
+        zrange.median,
+        zrange.trimmean,
+        fraction.kmeans,
+        cosine.similarity,
+        MoreArgs = list(na.rm = TRUE)
+        );
+    rank.product[num.NA > num.allowed.NA] <- NA;
+    rank.product^(1 / (5 - num.NA));
+    }
