@@ -13,6 +13,38 @@ detect.outliers <- function(data) {
         FUN = identify.bic.optimal.data.distribution,
         future.seed = TRUE
         );
+    # Calculate residuals of the observed data with respect to the
+    # optimal distribution.  (We use `as.numeric()` on the input to
+    # `calculate.residuals()` in order to handle data frame input.
+    observed.residuals <- future.apply::future_lapply(
+        X = seq_len(nrow(data)),
+        FUN = function(i) {
+            calculate.residuals(
+                x = as.numeric(data[i, ]),
+                distribution = optimal.distribution.data[i]
+                );
+            }
+        );
+    observed.residuals <- do.call(
+        what = rbind,
+        args = observed.residuals
+        );
+    rownames(observed.residuals) <- rownames(data);
+    # Apply 5% trimming to each row of residuals.
+    observed.residuals.trimmed <- future.apply::future_apply(
+        X = observed.residuals,
+        MARGIN = 1,
+        FUN = trim.sample
+        );
+    observed.residuals.trimmed <- t(observed.residuals.trimmed);
+    # Determine which of the normal, log-normal, exponential, or gamma
+    # distributions provides the best fit to each row of residuals.
+    optimal.distribution.residuals <- future.apply::future_apply(
+        X = observed.residuals.trimmed,
+        MARGIN = 1,
+        FUN = identify.bic.optimal.residuals.distribution
+        );
+
     # Compute quantities for outlier detection: (1) z-scores based on
     # the mean / standard deviation, (2) z-scores based on the trimmed
     # mean / trimmed standard deviation, (3) z-scores based on the
@@ -99,6 +131,7 @@ detect.outliers <- function(data) {
 
     list(
         optimal.distribution.data = optimal.distribution.data,
+        optimal.distribution.residuals = optimal.distribution.residuals,
         data.mean = data.mean,
         data.median = data.median,
         data.trimmean = data.trimmean,
