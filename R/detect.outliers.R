@@ -515,3 +515,113 @@ detect.outliers2 <- function(data, num.null) {
         null.cosine.similarity = null.cosine.similarity
         );
     }
+
+detect.outliers3 <- function(
+    data,
+    num.null,
+    p.value.threshold = 0.05,
+    kmeans.nstart = 1
+    ) {
+    # Determine which of the normal, log-normal, exponential, or gamma
+    # distributions provides the best fit to each row of values in
+    # `data`.
+    optimal.distribution.data <- future.apply::future_apply(
+        X = data,
+        MARGIN = 1,
+        FUN = identify.bic.optimal.data.distribution,
+        future.seed = TRUE
+        );
+    # Calculate residuals of the observed data with respect to the
+    # optimal distribution.  (We use `as.numeric()` on the input to
+    # `calculate.residuals()` in order to handle data frame input.
+    observed.residuals <- future.apply::future_lapply(
+        X = seq_len(nrow(data)),
+        FUN = function(i) {
+            calculate.residuals(
+                x = as.numeric(data[i, ]),
+                distribution = optimal.distribution.data[i]
+                );
+            }
+        );
+    observed.residuals <- do.call(
+        what = rbind,
+        args = observed.residuals
+        );
+    rownames(observed.residuals) <- rownames(data);
+    # Apply 5% trimming to each row of residuals.
+    observed.residuals <- future.apply::future_apply(
+        X = observed.residuals,
+        MARGIN = 1,
+        FUN = trim.sample
+        );
+    observed.residuals <- t(observed.residuals);
+    # Determine which of the normal, log-normal, exponential, or gamma
+    # distributions provides the best fit to each row of residuals.
+    optimal.distribution.residuals <- future.apply::future_apply(
+        X = observed.residuals,
+        MARGIN = 1,
+        FUN = identify.bic.optimal.residuals.distribution
+        );
+
+    # Generate a matrix of null transcripts by simulating from their
+    # respective optimal distributions.
+    sampled.indices <- sample(
+        x = nrow(data),
+        size = num.null,
+        replace = TRUE
+        );
+    null.data <- future.apply::future_lapply(
+        X = sampled.indices,
+        FUN = function(i) {
+            simulate.null(
+                x = as.numeric(data[i, ]),
+                x.distribution = optimal.distribution.data[i],
+                r = as.numeric(observed.residuals[i, ]),
+                r.distribution = optimal.distribution.residuals[i]
+                );
+            },
+        future.seed = TRUE
+        );
+    null.data <- do.call(
+        what = rbind,
+        args = null.data
+        );
+    rownames(null.data) <- rownames(data)[sampled.indices];
+    # Determine which of the normal, log-normal, exponential, or gamma
+    # distributions provides the best fit to each row of values in
+    # `null.data`.
+    optimal.distribution.null.data <- future.apply::future_apply(
+        X = null.data,
+        MARGIN = 1,
+        FUN = identify.bic.optimal.data.distribution,
+        future.seed = TRUE
+        );
+
+    # Calculate p-values.
+    p.values <- lapply(
+        X = seq_len(nrow(data)),
+        FUN = function(i) {
+            calculate.p.values(
+                x = as.numeric(data[i, ]),
+                x.distribution = optimal.distribution.data[i],
+                null.data = null.data,
+                null.distributions = optimal.distribution.null.data,
+                p.value.threshold = p.value.threshold,
+                kmeans.nstart = kmeans.nstart
+                );
+            }
+        );
+    p.values <- do.call(
+        what = rbind,
+        args = p.values
+        );
+    rownames(p.values) <- rownames(data);
+
+    list(
+        optimal.distribution.data = optimal.distribution.data,
+        optimal.distribution.residuals = optimal.distribution.residuals,
+        null.data = null.data,
+        optimal.distribution.null.data = optimal.distribution.null.data,
+        p.values
+        );
+    }
