@@ -91,8 +91,8 @@ simulate.null <- function(
     else if (4 == x.distribution) {
         mean.gamma <- mean(x.nozero.trim);
         sd.gamma <- stats::sd(x.nozero.trim);
-        gamma.shape <- (mean.gamma/sd.gamma)^2;
-        gamma.rate <- mean.gamma/(sd.gamma^2);
+        gamma.shape <- (mean.gamma / sd.gamma)^2;
+        gamma.rate <- mean.gamma / (sd.gamma^2);
         simulated.null <- stats::rgamma(
             n = length(x),
             shape = gamma.shape,
