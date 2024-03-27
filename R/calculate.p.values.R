@@ -12,7 +12,7 @@ calculate.p.values <- function(
     # Get the name and index of the most abundant sample in `x`.
     index.most.abundant.sample <- which.max(x);
     most.abundant.sample <- names(x)[index.most.abundant.sample];
-    # print(sprintf('Most abundant sample = %s', most.abundant.sample));
+    print(sprintf('Most abundant sample = %s', most.abundant.sample));
 
     data <- rbind(x, null.data);
     # Compute quantities for outlier detection: (1) z-scores based on
@@ -128,7 +128,7 @@ calculate.p.values <- function(
         # Get the name and index of the next most abundant sample.
         index.most.abundant.sample <- which.max(x);
         most.abundant.sample <- names(x)[index.most.abundant.sample];
-        # print(sprintf('Next most abundant sample = %s', most.abundant.sample));
+        print(sprintf('Next most abundant sample = %s', most.abundant.sample));
         # Remove a random column from `null.data`.
         column.to.remove <- sample(
             x = ncol(null.data),
