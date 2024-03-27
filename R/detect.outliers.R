@@ -601,8 +601,10 @@ detect.outliers3 <- function(
     p.values <- lapply(
         X = seq_len(nrow(data)),
         FUN = function(i) {
+            x <- as.numeric(data[i, ]);
+            names(x) <- colnames(data);
             calculate.p.values(
-                x = as.numeric(data[i, ]),
+                x = x,
                 x.distribution = optimal.distribution.data[i],
                 null.data = null.data,
                 null.distributions = optimal.distribution.null.data,
@@ -622,6 +624,6 @@ detect.outliers3 <- function(
         optimal.distribution.residuals = optimal.distribution.residuals,
         null.data = null.data,
         optimal.distribution.null.data = optimal.distribution.null.data,
-        p.values
+        p.values = p.values
         );
     }
