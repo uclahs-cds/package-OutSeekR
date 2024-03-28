@@ -601,7 +601,6 @@ detect.outliers3 <- function(
     outlier.test.results <- lapply(
         X = seq_len(nrow(data)),
         FUN = function(i) {
-            print(paste("Transcript", i));
             x <- as.numeric(data[i, ]);
             names(x) <- colnames(data);
             calculate.p.values(
