@@ -635,6 +635,40 @@ detect.outliers3 <- function(
             )
         );
     rownames(p.values) <- rownames(data);
+    # Get counts of the number of outliers per transcript.
+    num.outliers <- apply(
+        X = p.values,
+        MARGIN = 1,
+        FUN = function(x) sum(x < p.value.threshold)
+        );
+    # Create a list of outlier statistics matrices.  The list will be
+    # of length `max(num.outliers) + 1` and will contain entries
+    # `outlier.statistics.matrix.N`, where `N` is between zero and
+    # `max(num.outliers)`.  `outlier.statistics.matrix.N` is the
+    # matrix of outlier statistics after excluding the `N`th outlier
+    # sample, with `outlier.statistics.matrix.0` being for the full
+    # data set.  A transcript will only appear in the matrices up to
+    # the total number of outliers in that transcript; all transcripts
+    # appear in `outlier.statistics.matrix.0`.
+    outlier.statistics.matrix.list <- list();
+    for (i in 0:max(num.outliers)) {
+        next.name <- paste0('outlier.statistics.matrix.', i);
+        outlier.statistics.matrix.list[[next.name]] <- list();
+        for (j in seq_along(outlier.test.results)) {
+            outlier.statistics.matrix.list[[next.name]][[j]] <- getElement(
+                object = outlier.test.results[[j]],
+                name = c(
+                    'outlier.statistics.list',
+                    paste0('outlier.statistics.', i)
+                    )
+                );
+            }
+        outlier.statistics.matrix.list[[next.name]] <- do.call(
+            what = rbind,
+            args = outlier.statistics.matrix.list[[next.name]]
+            );
+        rownames(outlier.statistics.matrix.list[[next.name]]) <- names(num.outliers[num.outliers >= i]);
+        }
 
     list(
         optimal.distribution.data = optimal.distribution.data,
