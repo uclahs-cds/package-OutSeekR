@@ -598,7 +598,7 @@ detect.outliers3 <- function(
         );
 
     # Calculate p-values.
-    p.values <- lapply(
+    outlier.test.results <- lapply(
         X = seq_len(nrow(data)),
         FUN = function(i) {
             print(paste("Transcript", i));
@@ -614,9 +614,25 @@ detect.outliers3 <- function(
                 );
             }
         );
+    #
+    # Prepare output
+    #
+    # Assemble a matrix of p-values for each transcript and sample.
+    # Currently, the p-values are stored in the 'p.values' entry of
+    # each sublist of `outlier.test.results`, with each sublist
+    # corresponding to a different transcript.  We extract these
+    # entries and then `rbind()` them to form a matrix.
     p.values <- do.call(
         what = rbind,
-        args = p.values
+        args = lapply(
+            X = outlier.test.results,
+            FUN = function(x) {
+                getElement(
+                    object = x,
+                    name = 'p.values'
+                    );
+                }
+            )
         );
     rownames(p.values) <- rownames(data);
 
