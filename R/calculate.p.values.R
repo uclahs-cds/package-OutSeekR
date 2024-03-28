@@ -13,6 +13,9 @@ calculate.p.values <- function(
     index.most.abundant.sample <- which.max(x);
     most.abundant.sample <- names(x)[index.most.abundant.sample];
     print(sprintf('Most abundant sample = %s', most.abundant.sample));
+    # Initialize a list to store the outlier statistics for `x` as
+    # well as subsequent copies of `x` as each outlier is excluded.
+    outlier.statistics.list <- list();
 
     data <- rbind(x, null.data);
     # Compute quantities for outlier detection: (1) z-scores based on
@@ -87,6 +90,21 @@ calculate.p.values <- function(
                     );
                 }
             }
+        );
+    # Record the outlier statistics for `x`.
+    outlier.statistics.list[['outlier.statistics.0']] <- c(
+        zrange.mean[1],
+        zrange.median[1],
+        zrange.trimmean[1],
+        fraction.kmeans[1],
+        cosine.similarity[1]
+        );
+    names(outlier.statistics.list[['outlier.statistics.0']]) <- c(
+        'zrange.mean',
+        'zrange.median',
+        'zrange.trimmean',
+        'fraction.kmeans',
+        'cosine.similarity'
         );
     # Assign ranks within each method.
     rank.zrange.mean <- outlier.rank2(
@@ -204,6 +222,25 @@ calculate.p.values <- function(
                         );
                     }
                 }
+            );
+        # Record the outlier statistics for `x`.
+        next.entry.name <- paste0(
+            'outlier.statistics.',
+            length(outlier.statistics.list)
+            );
+        outlier.statistics.list[[next.entry.name]] <- c(
+            zrange.mean[1],
+            zrange.median[1],
+            zrange.trimmean[1],
+            fraction.kmeans[1],
+            cosine.similarity[1]
+            );
+        names(outlier.statistics.list[[next.entry.name]]) <- c(
+            'zrange.mean',
+            'zrange.median',
+            'zrange.trimmean',
+            'fraction.kmeans',
+            'cosine.similarity'
             );
         # Assign ranks within each method.
         rank.zrange.mean <- outlier.rank2(
