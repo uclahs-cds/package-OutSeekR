@@ -12,7 +12,6 @@ calculate.p.values <- function(
     # Get the name and index of the most abundant sample in `x`.
     index.most.abundant.sample <- which.max(x);
     most.abundant.sample <- names(x)[index.most.abundant.sample];
-    print(sprintf('Most abundant sample = %s', most.abundant.sample));
     # Initialize a list to store the outlier statistics for `x` as
     # well as subsequent copies of `x` as each outlier is excluded.
     outlier.statistics.list <- list();
@@ -29,7 +28,6 @@ calculate.p.values <- function(
         FUN = quantify.outliers,
         method = 'mean'
         );
-    ## print('First zrange.mean');
     zrange.median <- future.apply::future_apply(
         X = data,
         MARGIN = 1,
@@ -146,7 +144,6 @@ calculate.p.values <- function(
         # Get the name and index of the next most abundant sample.
         index.most.abundant.sample <- which.max(x);
         most.abundant.sample <- names(x)[index.most.abundant.sample];
-        print(sprintf('Next most abundant sample = %s', most.abundant.sample));
         # Remove a random column from `null.data`.
         column.to.remove <- sample(
             x = ncol(null.data),
@@ -155,7 +152,6 @@ calculate.p.values <- function(
         null.data <- null.data[, -column.to.remove];
 
         data <- rbind(x, null.data);
-        # print(nrow(data));
         zrange.mean <- future.apply::future_apply(
             X = data,
             MARGIN = 1,
@@ -283,19 +279,6 @@ calculate.p.values <- function(
     # `p.value.threshold`.
     p.values[is.na(p.values) | p.values > p.value.threshold] <- p.value.threshold;
 
-# x <- rgamma(25, 2, 2);
-# names(x) <- paste0('S', 1:length(x));
-# x[1] <- 10000; x[2] <- 1000;
-# nn <- matrix(rgamma(25 * 1000, 2, 2), nrow = 1000);
-# x.dist <- 4; nn.dist <- rep(4, times = nrow(nn));
-
-# pp <- calculate.p.values(
-#     x = x,
-#     x.distribution = x.dist,
-#     null.data = nn,
-#     null.distributions = nn.dist,
-#     p.value.threshold = 0.10
-#     );
     list(
         p.values = p.values,
         outlier.statistics.list = outlier.statistics.list
