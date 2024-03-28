@@ -670,10 +670,9 @@ detect.outliers3 <- function(
         }
 
     list(
-        optimal.distribution.data = optimal.distribution.data,
-        optimal.distribution.residuals = optimal.distribution.residuals,
-        null.data = null.data,
-        optimal.distribution.null.data = optimal.distribution.null.data,
-        p.values = p.values
+        p.values = p.values,
+        num.outliers = num.outliers,
+        outlier.statistics.matrix.list = outlier.statistics.matrix.list,
+        distributions = optimal.distribution.data
         );
     }
