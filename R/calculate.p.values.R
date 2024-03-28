@@ -282,8 +282,6 @@ calculate.p.values <- function(
     # values greater than `p.value.threshold` in `p.values` with
     # `p.value.threshold`.
     p.values[is.na(p.values) | p.values > p.value.threshold] <- p.value.threshold;
-    p.values;
-    }
 
 # x <- rgamma(25, 2, 2);
 # names(x) <- paste0('S', 1:length(x));
@@ -298,3 +296,8 @@ calculate.p.values <- function(
 #     null.distributions = nn.dist,
 #     p.value.threshold = 0.10
 #     );
+    list(
+        p.values = p.values,
+        outlier.statistics.list = outlier.statistics.list
+        );
+    }
