@@ -1,9 +1,10 @@
 #' Detect outliers
 #'
 #' @param data A matrix or data frame of FPKM values, organized with transcripts on rows and samples on columns.  Transcript identifiers should be stored as `rownames(data)`.
+#' @param num.null The number of transcripts to generate when simulating from null distributions.
 #'
 #' @export
-detect.outliers <- function(data) {
+detect.outliers <- function(data, num.null) {
     # Determine which of the normal, log-normal, exponential, or gamma
     # distributions provides the best fit to each row of values in
     # `data`.
@@ -129,6 +130,115 @@ detect.outliers <- function(data) {
         num.allowed.NA = 0
         );
 
+    # Generate a matrix of null transcripts by simulating from their
+    # respective optimal distributions.
+    sampled.indices <- sample(
+        x = nrow(data),
+        size = num.null,
+        replace = TRUE
+        );
+    null.data <- future.apply::future_lapply(
+        X = sampled.indices,
+        FUN = function(i) {
+            simulate.null(
+                x = as.numeric(data[i, ]),
+                x.distribution = optimal.distribution.data[i],
+                r = as.numeric(observed.residuals.trimmed[i, ]),
+                r.distribution = optimal.distribution.residuals[i]
+                );
+            },
+        future.seed = TRUE
+        );
+    null.data <- do.call(
+        what = rbind,
+        args = null.data
+        );
+    rownames(null.data) <- rownames(data)[sampled.indices];
+    # Determine which of the normal, log-normal, exponential, or gamma
+    # distributions provides the best fit to each row of values in
+    # `null.data`.
+    optimal.distribution.null.data <- future.apply::future_apply(
+        X = null.data,
+        MARGIN = 1,
+        FUN = identify.bic.optimal.data.distribution,
+        future.seed = TRUE
+        );
+
+    # Compute quantities for outlier detection on the null data: (1)
+    # z-scores based on the mean / standard deviation, (2) z-scores
+    # based on the trimmed mean / trimmed standard deviation, (3)
+    # z-scores based on the median / median absolute deviation, and
+    # (4) the cluster assignment from k-means with two clusters.
+    data.mean <- future.apply::future_apply(
+        X = null.data,
+        MARGIN = 1,
+        FUN = quantify.outliers,
+        method = 'mean'
+        );
+    data.median <- future.apply::future_apply(
+        X = null.data,
+        MARGIN = 1,
+        FUN = quantify.outliers,
+        method = 'median'
+        );
+    data.trimmean <- future.apply::future_apply(
+        X = null.data,
+        MARGIN = 1,
+        FUN = quantify.outliers,
+        method = 'mean',
+        trim = 0.05
+        );
+    data.kmeans <- future.apply::future_apply(
+        X = null.data,
+        MARGIN = 1,
+        FUN = quantify.outliers,
+        method = 'kmeans',
+        nstart = 1000,
+        future.seed = TRUE
+        );
+    # Compute the ranges of the z-score statistics.
+    zrange.mean <- future.apply::future_apply(
+        X = data.mean,
+        MARGIN = 2,
+        FUN = zrange
+        );
+    zrange.median <- future.apply::future_apply(
+        X = data.median,
+        MARGIN = 2,
+        FUN = zrange
+        );
+    zrange.trimmean <- future.apply::future_apply(
+        X = data.trimmean,
+        MARGIN = 2,
+        FUN = zrange
+        );
+    # Compute the k-means fraction.
+    fraction.kmeans <- future.apply::future_apply(
+        X = data.kmeans,
+        MARGIN = 2,
+        FUN = kmeans.fraction
+        );
+    # Compute the cosine similarity.
+    cosine.similarity <- future.apply::future_sapply(
+        X = seq_len(nrow(null.data)),
+        FUN = function(i) {
+            outlier.detection.cosine(
+                x = as.numeric(null.data[i, ]),
+                distribution = optimal.distribution.null.data[i]
+                );
+            }
+        );
+    names(cosine.similarity) <- rownames(null.data);
+    # Assemble the statistics from the five methods into a single
+    # matrix.
+    null.5method <- cbind(
+        zrange.mean = zrange.mean,
+        zrange.median = zrange.median,
+        zrange.trimmean = zrange.trimmean,
+        fraction.kmeans = fraction.kmeans,
+        cosine.similarity = cosine.similarity
+        );
+
     list(
         optimal.distribution.data = optimal.distribution.data,
         optimal.distribution.residuals = optimal.distribution.residuals,
@@ -143,6 +253,9 @@ detect.outliers <- function(data) {
         cosine.similarity = cosine.similarity,
         observed.5method = observed.5method,
         observed.5method.ranks = observed.5method.ranks,
-        observed.5method.rank.product = observed.5method.rank.product
+        observed.5method.rank.product = observed.5method.rank.product,
+        null.data = null.data,
+        optimal.distribution.null.data = optimal.distribution.null.data,
+        null.5method = null.5method
         );
     }

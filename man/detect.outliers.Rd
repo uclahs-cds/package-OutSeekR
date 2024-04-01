@@ -4,10 +4,12 @@
 \alias{detect.outliers}
 \title{Detect outliers}
 \usage{
-detect.outliers(data)
+detect.outliers(data, num.null)
 }
 \arguments{
 \item{data}{A matrix or data frame of FPKM values, organized with transcripts on rows and samples on columns.  Transcript identifiers should be stored as \code{rownames(data)}.}
+
+\item{num.null}{The number of transcripts to generate when simulating from null distributions.}
 }
 \description{
 Detect outliers
