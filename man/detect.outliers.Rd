@@ -4,12 +4,16 @@
 \alias{detect.outliers}
 \title{Detect outliers}
 \usage{
-detect.outliers(data, num.null)
+detect.outliers(data, num.null, p.value.threshold = 0.05, kmeans.nstart = 1)
 }
 \arguments{
 \item{data}{A matrix or data frame of FPKM values, organized with transcripts on rows and samples on columns.  Transcript identifiers should be stored as \code{rownames(data)}.}
 
 \item{num.null}{The number of transcripts to generate when simulating from null distributions.}
+
+\item{p.value.threshold}{The p-value threshold for the outlier test; default is 0.05.  Once the p-value for a sample exceeds \code{p.value.threshold}, testing for that transcript ceases, and all samples (including the one that initially exceeded \code{p.value.threshold}) are assigned p-values equal to \code{p.value.threshold}.}
+
+\item{kmeans.nstart}{The number of random starts when computing k-means fraction; default is 1.  See \code{?stats::kmeans} for further details.}
 }
 \description{
 Detect outliers
