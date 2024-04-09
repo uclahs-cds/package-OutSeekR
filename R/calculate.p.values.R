@@ -113,28 +113,28 @@ calculate.p.values <- function(
         'cosine.similarity'
         );
     # Assign ranks within each method.
-    rank.zrange.mean <- outlier.rank2(
+    rank.zrange.mean <- outlier.rank(
         outlier.statistic = zrange.mean,
         method = 'zrange.mean'
         );
-    rank.zrange.median <- outlier.rank2(
+    rank.zrange.median <- outlier.rank(
         outlier.statistic = zrange.median,
         method = 'zrange.median'
         );
-    rank.zrange.trimmean <- outlier.rank2(
+    rank.zrange.trimmean <- outlier.rank(
         outlier.statistic = zrange.trimmean,
         method = 'zrange.trimmean'
         );
-    rank.fraction.kmeans <- outlier.rank2(
+    rank.fraction.kmeans <- outlier.rank(
         outlier.statistic = fraction.kmeans,
         method = 'fraction.kmeans'
         );
-    rank.cosine.similarity <- outlier.rank2(
+    rank.cosine.similarity <- outlier.rank(
         outlier.statistic = cosine.similarity,
         method = 'cosine.similarity'
         );
     # Compute the rank product for each transcript.
-    rank.product <- outlier.rank.product2(
+    rank.product <- outlier.rank.product(
         zrange.mean = rank.zrange.mean,
         zrange.median = rank.zrange.median,
         zrange.trimmean = rank.zrange.trimmean,
@@ -247,28 +247,28 @@ calculate.p.values <- function(
             'cosine.similarity'
             );
         # Assign ranks within each method.
-        rank.zrange.mean <- outlier.rank2(
+        rank.zrange.mean <- outlier.rank(
             outlier.statistic = zrange.mean,
             method = 'zrange.mean'
             );
-        rank.zrange.median <- outlier.rank2(
+        rank.zrange.median <- outlier.rank(
             outlier.statistic = zrange.median,
             method = 'zrange.median'
             );
-        rank.zrange.trimmean <- outlier.rank2(
+        rank.zrange.trimmean <- outlier.rank(
             outlier.statistic = zrange.trimmean,
             method = 'zrange.trimmean'
             );
-        rank.fraction.kmeans <- outlier.rank2(
+        rank.fraction.kmeans <- outlier.rank(
             outlier.statistic = fraction.kmeans,
             method = 'fraction.kmeans'
             );
-        rank.cosine.similarity <- outlier.rank2(
+        rank.cosine.similarity <- outlier.rank(
             outlier.statistic = cosine.similarity,
             method = 'cosine.similarity'
             );
         # Compute the rank product for each transcript.
-        rank.product <- outlier.rank.product2(
+        rank.product <- outlier.rank.product(
             zrange.mean = rank.zrange.mean,
             zrange.median = rank.zrange.median,
             zrange.trimmean = rank.zrange.trimmean,
