@@ -1,4 +1,12 @@
-#' Calculate p-values for a single transcript
+#' Calculate p-values
+#'
+#' Calculate p-values for a single transcript.
+#'
+#' @return A list consisting of the following entries:
+#' * `p.values`: a vector of p-values for the outlier test run on each sample (up until the p-value exceeds `p.value.threshold`); and
+#' * `outlier.statistics.list`, a list of vectors containing the values of the outlier statistics calculated from the remaining samples.  The list will be of length equal to one plus the total number of outliers (i.e., the number of samples with an outlier test p-value less than `p.value.threshold`) and will contain entries `outlier.statistics.N`, where `N` is between zero and the total number of outliers.  `outlier.statistics.N` is the vector of outlier statistics after excluding the `N`th outlier sample, with `outlier.statistics.0` being for the complete transcript.
+#'
+#' @noRd
 calculate.p.values <- function(
     x,
     x.distribution,

@@ -87,7 +87,11 @@ detect.outliers <- function(
         future.seed = TRUE
         );
 
-    # Calculate p-values.
+    # Calculate p-values.  The result is a list of length equal to
+    # `nrow(data)`, with each sublist containing the results of
+    # `calculate.p.values()` for a transcript in the observed data.
+    # See the documentation for `calculate.p.values()` for a
+    # description of its return value.
     outlier.test.results <- lapply(
         X = seq_len(nrow(data)),
         FUN = function(i) {
