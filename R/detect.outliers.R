@@ -902,7 +902,7 @@ detect.outliers.sans.null.data <- function(
         FUN = function(i) {
             x <- as.numeric(data[i, ]);
             names(x) <- colnames(data);
-            calculate.p.values.sans.null.data(
+            calculate.p.values(
                 x = x,
                 x.distribution = optimal.distribution.data[i],
                 x.zrange.mean = data.zrange.mean[i],
