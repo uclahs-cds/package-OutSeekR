@@ -531,9 +531,24 @@ calculate.p.values2 <- function(
         );
     }
 
-#' Calculate p-values, without `null.data`
+#' Calculate p-values
 #'
-#' Calculate p-values for a single transcript.
+#' Calculate p-values for each sample of a single transcript.
+#'
+#' @param x A numeric vector of values for an observed transcript.
+#' @param x.distribution A numeric code corresponding to the optimal distribution of `x` as returned by `identify.bic.optimal.data.distribution()`.
+#' @param x.zrange.mean A number, the range of the z-scores calculated using the mean and standard deviation of `x`.
+#' @param x.zrange.median A number, the range of the z-scores calculated using the median and median absolute deviation of `x`.
+#' @param x.zrange.trimmean A number, the range of the z-scores calculated using the trimmed mean and trimmed standard deviation of `x`.
+#' @param x.fraction.kmeans A number, the k-means fraction of `x`.
+#' @param x.cosine.similarity A number, the cosine similarity of `x`.
+#' @param null.zrange.mean A numeric vector, the ranges of the z-scores calculated using the mean and standard deviation of each transcript in the null data.
+#' @param null.zrange.median A numeric vector, the ranges of the z-scores calculated using the median and median absolute deviation of each transcript in the null data.
+#' @param null.zrange.trimmean A numeric vector, the ranges of the z-scores calculated using the trimmed mean and trimmed standard deviation of each transcript in the null data.
+#' @param null.fraction.kmeans A numeric vector, the k-means fraction of each transcript in the null data.
+#' @param null.cosine.similarity A numeric vector, the cosine similarity of each transcript in the null data.
+#' @param p.value.threshold The p-value threshold for the outlier test; default is 0.05.  Once the p-value for a sample exceeds `p.value.threshold`, testing ceases, and all samples (including the one that initially exceeded `p.value.threshold`) are assigned p-values equal to `p.value.threshold`.
+#' @param kmeans.nstart The number of random starts when computing k-means fraction; default is 1.  See `?stats::kmeans` for further details.
 #'
 #' @return A list consisting of the following entries:
 #' * `p.values`: a vector of p-values for the outlier test run on each sample (up until the p-value exceeds `p.value.threshold`); and
