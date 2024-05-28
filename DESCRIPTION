@@ -1,4 +1,4 @@
-Package: OutlierDetectionAlgorithm
+Package: OutSeekR
 Type: Package
 Title: Algorithm to Detect Outliers
 Version: 0.1.0
