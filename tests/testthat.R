@@ -1,4 +1,4 @@
 library(testthat);
-library(OutlierDetectionAlgorithm);
+library(OutSeekR);
 
-test_check('OutlierDetectionAlgorithm');
+test_check('OutSeekR');
