@@ -272,41 +272,42 @@ detect.outliers <- function(
     num.outliers <- apply(
         X = p.values,
         MARGIN = 1,
-        FUN = function(x) sum(x < p.value.threshold)
+        FUN = function(x) sum(x < p.value.threshold, na.rm = TRUE)
         );
-    # Create a list of outlier statistics matrices.  The list will be
-    # of length `max(num.outliers) + 1` and will contain entries
-    # `outlier.statistics.matrix.N`, where `N` is between zero and
-    # `max(num.outliers)`.  `outlier.statistics.matrix.N` is the
-    # matrix of outlier statistics after excluding the `N`th outlier
-    # sample, with `outlier.statistics.matrix.0` being for the full
-    # data set.  A transcript will only appear in the matrices up to
-    # the total number of outliers in that transcript; all transcripts
-    # appear in `outlier.statistics.matrix.0`.
-    outlier.statistics.matrix.list <- list();
-    for (i in 0:max(num.outliers)) {
-        next.name <- paste0('outlier.statistics.matrix.', i);
-        outlier.statistics.matrix.list[[next.name]] <- list();
+    # Create a list of outlier test results data frames.  The list
+    # will be of length `max(num.outliers) + 1` and will contain
+    # entries `roundN`, where `N` is between one and
+    # `max(num.outliers) + 1`.  `roundN` is the data frame of results
+    # for the outlier test after excluding the `N`th outlier sample,
+    # with `round1` being for the original data set (i.e., before
+    # excluding any outlier samples).  A transcript will only appear
+    # in the data frames up to the total number of outliers in that
+    # transcript plus one; all transcripts appear in `round1`.
+    outlier.test.results.list <- list();
+    for (i in 1:(max(num.outliers) + 1)) {
+        next.name <- paste0('round', i);
+        outlier.test.results.list[[next.name]] <- list();
         for (j in seq_along(outlier.test.results)) {
-            outlier.statistics.matrix.list[[next.name]][[j]] <- getElement(
+            outlier.test.results.list[[next.name]][[j]] <- getElement(
                 object = outlier.test.results[[j]],
                 name = c(
-                    'outlier.statistics.list',
-                    paste0('outlier.statistics.', i)
+                    'results.list',
+                    paste0('round', i)
                     )
                 );
             }
-        outlier.statistics.matrix.list[[next.name]] <- do.call(
+        # Convert the list of one-row data frames to a data frame.
+        outlier.test.results.list[[next.name]] <- do.call(
             what = rbind,
-            args = outlier.statistics.matrix.list[[next.name]]
+            args = outlier.test.results.list[[next.name]]
             );
-        rownames(outlier.statistics.matrix.list[[next.name]]) <- names(num.outliers[num.outliers >= i]);
+        rownames(outlier.test.results.list[[next.name]]) <- names(num.outliers[num.outliers >= (i - 1)]);
         }
 
     list(
         p.values = p.values,
         num.outliers = num.outliers,
-        outlier.statistics.matrix.list = outlier.statistics.matrix.list,
+        outlier.test.results.list = outlier.test.results.list,
         distributions = optimal.distribution.data
         );
     }
