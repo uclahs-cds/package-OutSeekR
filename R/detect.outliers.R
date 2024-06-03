@@ -309,9 +309,40 @@ detect.outliers <- function(
             );
         rownames(outlier.test.results.list[[next.name]]) <- names(num.outliers[num.outliers >= (i - 1)]);
         }
+    fdr <- matrix(
+        data = NA,
+        nrow = nrow(data),
+        ncol = ncol(data),
+        dimnames = list(
+            rownames(data),
+            colnames(data)
+            )
+        );
+    for (i in seq_along(outlier.test.results.list)) {
+        temp <- outlier.test.results.list[[i]];
+        temp <- temp[, c('sample', 'fdr')];
+        temp$transcript <- rownames(temp);
+        fdr.this.round <- stats::reshape(
+            data = temp,
+            direction = 'wide',
+            idvar = 'transcript',
+            timevar = 'sample'
+            );
+        rownames(fdr.this.round) <- fdr.this.round$transcript;
+        fdr.this.round$transcript <- NULL;
+        colnames(fdr.this.round) <- sub(
+            pattern = 'fdr.',
+            replacement = '',
+            x = colnames(fdr.this.round),
+            fixed = TRUE
+            );
+        fdr.this.round <- as.matrix(fdr.this.round);
+        fdr[rownames(fdr.this.round), colnames(fdr.this.round)] <- fdr.this.round;
+        }
 
     list(
         p.values = p.values,
+        fdr = fdr,
         num.outliers = num.outliers,
         outlier.test.results.list = outlier.test.results.list,
         distributions = optimal.distribution.data
