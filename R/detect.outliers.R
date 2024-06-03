@@ -301,6 +301,12 @@ detect.outliers <- function(
             what = rbind,
             args = outlier.test.results.list[[next.name]]
             );
+        # Adjust the p-values from this round of results using the
+        # false discovery rate (FDR).
+        outlier.test.results.list[[next.name]]$fdr <- p.adjust(
+            p = outlier.test.results.list[[next.name]]$p.value,
+            method = 'fdr'
+            );
         rownames(outlier.test.results.list[[next.name]]) <- names(num.outliers[num.outliers >= (i - 1)]);
         }
 
