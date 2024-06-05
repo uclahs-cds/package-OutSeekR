@@ -87,9 +87,12 @@ quantify.outliers <- function(x, method = 'mean', trim = 0, nstart = 1, exclude.
             data.median <- stats::median(x.na);
             data.mad <- stats::mad(x.na);
             }
+        if (0 == data.mad || is.na(data.mad) || is.na(data.median)) {
+            return(rep(NA, length(x)));
+            }
         result.na <- (x.na - data.median) / data.mad;
         x[which(!is.na(x))] <- result.na;
-        x;
+        return(x);
         }
     else if ('kmeans' == method) {
         if (exclude.zero) {
@@ -138,7 +141,7 @@ quantify.outliers <- function(x, method = 'mean', trim = 0, nstart = 1, exclude.
             }
         result.na <- kmeans.matrix;
         x[which(!is.na(x))] <- result.na;
-        x;
+        return(x);
         }
     else if ('mean' == method) {
         gene.order <- x.na[order(x.na, decreasing = TRUE)];
@@ -173,9 +176,12 @@ quantify.outliers <- function(x, method = 'mean', trim = 0, nstart = 1, exclude.
                 );
             data.sd <- stats::sd(gene.order[(top.patient + 1):(low.patient)]);
             }
+        if (0 == data.sd || is.na(data.sd) || is.na(data.mean)) {
+            return(rep(NA, length(x)));
+            }
         result.na <- (x.na - data.mean) / data.sd;
         x[which(!is.na(x))] <- result.na;
-        x;
+        return(x);
         }
     }
 
