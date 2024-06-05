@@ -304,7 +304,7 @@ detect.outliers <- function(
             );
         # Adjust the p-values from this round of results using the
         # false discovery rate (FDR).
-        outlier.test.results.list[[next.name]]$fdr <- p.adjust(
+        outlier.test.results.list[[next.name]]$fdr <- stats::p.adjust(
             p = outlier.test.results.list[[next.name]]$p.value,
             method = 'fdr'
             );
