@@ -4,26 +4,36 @@
 \alias{detect.outliers}
 \title{Detect outliers}
 \usage{
-detect.outliers(data, num.null, p.value.threshold = 0.05, kmeans.nstart = 1)
+detect.outliers(
+  data,
+  num.null,
+  p.value.threshold = 0.05,
+  fdr.threshold = 0.01,
+  kmeans.nstart = 1
+)
 }
 \arguments{
-\item{data}{A matrix or data frame of FPKM values, organized with transcripts on rows and samples on columns.  Transcript identifiers should be stored as \code{rownames(data)}.}
+\item{data}{A matrix or data frame of normalized RNA-seq data, organized with transcripts on rows and samples on columns.  Transcript identifiers should be stored as \code{rownames(data)}.}
 
 \item{num.null}{The number of transcripts to generate when simulating from null distributions.}
 
-\item{p.value.threshold}{The p-value threshold for the outlier test; default is 0.05.  Once the p-value for a sample exceeds \code{p.value.threshold}, testing for that transcript ceases, and all samples (including the one that initially exceeded \code{p.value.threshold}) are assigned p-values equal to \code{p.value.threshold}.}
+\item{p.value.threshold}{The p-value threshold for the outlier test; default is 0.05.  Once the p-value for a sample exceeds \code{p.value.threshold}, testing for that transcript ceases, and all remaining samples will have p-values equal to \code{NA}.}
+
+\item{fdr.threshold}{The false discovery rate (FDR)-adjusted p-value threshold for determining the final count of outliers; default is 0.01.}
 
 \item{kmeans.nstart}{The number of random starts when computing k-means fraction; default is 1.  See \code{?stats::kmeans} for further details.}
 }
 \value{
 A list consisting of the following entries:
 \itemize{
-\item \code{p.values}: a matrix of p-values for the outlier test run on each sample for each transcript in \code{data}.
-\item \code{num.outliers}: a vector giving the number of outliers (specifically, the number of samples for which the outlier test yielded a p-value less than \code{p.value.threshold})  for each transcript.
-\item \code{outlier.statistics.matrix.list}: a list of length \code{max(num.outliers) + 1} containing entries \code{outlier.statistics.matrix.N}, where \code{N} is between zero and \code{max(num.outliers)}.  \code{outlier.statistics.matrix.N} is the matrix of outlier statistics after excluding the \code{N}th outlier sample, with \code{outlier.statistics.matrix.0} being for the full data set.  A transcript will only appear in the matrices up to the total number of outliers in that transcript; all transcripts appear in \code{outlier.statistics.matrix.0}.
+\item \code{p.values}: a matrix of unadjusted p-values for the outlier test run on each sample for each transcript in \code{data}.
+\item \code{fdr}: a matrix of FDR-adjusted p-values for the outlier test run on each sample for each transcript in \code{data}.
+\item \code{num.outliers.unadjusted}: a vector giving the number of samples for which the outlier test yielded a p-value less than \code{p.value.threshold} for each transcript.
+\item \code{num.outliers.adjusted}: a vector giving the number of samples for which the outlier test yielded an FDR-adjusted p-value less than \code{fdr.threshold} for each transcript.
+\item \code{outlier.test.results.list}: a list of length \code{max(num.outliers.unadjusted) + 1} containing entries \code{roundN}, where \code{N} is between one and \code{max(num.outliers.unadjusted) + 1}.  \code{roundN} is the data frame of results for the outlier test after excluding the (N-1)th outlier sample, with \code{round1} being for the original data set (i.e., before excluding any outlier samples).  A transcript will only appear in the data frames up to the total number of outliers in that transcript plus one; for example, a transcript with one outlier will appear in \code{round1} and \code{round2}.  All transcripts appear in \code{round1}.
 \item \code{distributions}: a numeric vector indicating the optimal distribution for each transcript.  Possible values are 1 (normal), 2 (log-normal), 3 (exponential), and 4 (gamma).
 }
 }
 \description{
-Detect outliers
+Detect outliers in normalized RNA-seq data.
 }
