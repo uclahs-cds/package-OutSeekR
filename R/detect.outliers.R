@@ -1,6 +1,8 @@
 #' Detect outliers
 #'
-#' @param data A matrix or data frame of FPKM values, organized with transcripts on rows and samples on columns.  Transcript identifiers should be stored as `rownames(data)`.
+#' Detect outliers in normalized RNA-seq data.
+#'
+#' @param data A matrix or data frame of normalized RNA-seq data, organized with transcripts on rows and samples on columns.  Transcript identifiers should be stored as `rownames(data)`.
 #' @param num.null The number of transcripts to generate when simulating from null distributions.
 #' @param p.value.threshold The p-value threshold for the outlier test; default is 0.05.  Once the p-value for a sample exceeds `p.value.threshold`, testing for that transcript ceases, and all remaining samples will have p-values equal to `NA`.
 #' @param fdr.threshold The false discovery rate (FDR)-adjusted p-value threshold for determining the final count of outliers; default is 0.01.
@@ -10,7 +12,7 @@
 #' * `p.values`: a matrix of unadjusted p-values for the outlier test run on each sample for each transcript in `data`.
 #' * `fdr`: a matrix of FDR-adjusted p-values for the outlier test run on each sample for each transcript in `data`.
 #' * `num.outliers.unadjusted`: a vector giving the number of samples for which the outlier test yielded a p-value less than `p.value.threshold` for each transcript.
-#' * `num.outliers.adjuste`: a vector giving the number of samples for which the outlier test yielded an FDR-adjusted p-value less than `fdr.threshold` for each transcript.
+#' * `num.outliers.adjusted`: a vector giving the number of samples for which the outlier test yielded an FDR-adjusted p-value less than `fdr.threshold` for each transcript.
 #' * `outlier.test.results.list`: a list of length `max(num.outliers.unadjusted) + 1` containing entries `roundN`, where `N` is between one and `max(num.outliers.unadjusted) + 1`.  `roundN` is the data frame of results for the outlier test after excluding the (N-1)th outlier sample, with `round1` being for the original data set (i.e., before excluding any outlier samples).  A transcript will only appear in the data frames up to the total number of outliers in that transcript plus one; for example, a transcript with one outlier will appear in `round1` and `round2`.  All transcripts appear in `round1`.
 #' * `distributions`: a numeric vector indicating the optimal distribution for each transcript.  Possible values are 1 (normal), 2 (log-normal), 3 (exponential), and 4 (gamma).
 #'
