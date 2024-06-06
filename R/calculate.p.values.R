@@ -43,24 +43,9 @@ calculate.p.values <- function(
     # Get the name and index of the most abundant sample in `x`.
     index.most.abundant.sample <- which.max(x);
     most.abundant.sample <- names(x)[index.most.abundant.sample];
-    # Initialize a list to store the outlier statistics for `x` as
-    # well as subsequent copies of `x` as each outlier is excluded.
-    outlier.statistics.list <- list();
-    # Record the outlier statistics for `x`.
-    outlier.statistics.list[['outlier.statistics.0']] <- c(
-        x.zrange.mean,
-        x.zrange.median,
-        x.zrange.trimmean,
-        x.fraction.kmeans,
-        x.cosine.similarity
-        );
-    names(outlier.statistics.list[['outlier.statistics.0']]) <- c(
-        'zrange.mean',
-        'zrange.median',
-        'zrange.trimmean',
-        'fraction.kmeans',
-        'cosine.similarity'
-        );
+    # Initialize a list to store the results of the outlier testing at
+    # each round.
+    results.list <- list();
 
     # Combine the outlier statistics from this observed transcript
     # with those of the null data.
@@ -102,6 +87,17 @@ calculate.p.values <- function(
     # in `x`.
     p.value <- (sum(rank.product[1] >= rank.product[-1]) + 1) / length(rank.product);
     p.values[most.abundant.sample] <- p.value;
+    # Record results for the original `x`.
+    results.list[['round1']] <- data.frame(
+        sample = most.abundant.sample,
+        zrange.mean = x.zrange.mean,
+        zrange.median = x.zrange.median,
+        zrange.trimmean = x.zrange.trimmean,
+        fraction.kmeans = x.fraction.kmeans,
+        cosine.similarity = x.cosine.similarity,
+        rank.product = rank.product[1],
+        p.value = p.value
+        );
 
     while (p.value < p.value.threshold) {
         # Remove the most abundant sample from `x`.
@@ -149,26 +145,6 @@ calculate.p.values <- function(
             x = x,
             distribution = x.distribution
             );
-        # Record the outlier statistics for the remaining samples in
-        # `x`.
-        next.entry.name <- paste0(
-            'outlier.statistics.',
-            length(outlier.statistics.list)
-            );
-        outlier.statistics.list[[next.entry.name]] <- c(
-            x.zrange.mean,
-            x.zrange.median,
-            x.zrange.trimmean,
-            x.fraction.kmeans,
-            x.cosine.similarity
-            );
-        names(outlier.statistics.list[[next.entry.name]]) <- c(
-            'zrange.mean',
-            'zrange.median',
-            'zrange.trimmean',
-            'fraction.kmeans',
-            'cosine.similarity'
-            );
 
         # Combine the recomputed outlier statistics from the remaining
         # samples of this observed transcript with those of the null
@@ -211,16 +187,25 @@ calculate.p.values <- function(
         # in `x`.
         p.value <- (sum(rank.product[1] >= rank.product[-1]) + 1) / length(rank.product);
         p.values[most.abundant.sample] <- p.value;
+        # Record results for the remaining samples in `x`.
+        next.entry.name <- paste0(
+            'round',
+            length(results.list) + 1
+            );
+        results.list[[next.entry.name]] <- data.frame(
+            sample = most.abundant.sample,
+            zrange.mean = x.zrange.mean,
+            zrange.median = x.zrange.median,
+            zrange.trimmean = x.zrange.trimmean,
+            fraction.kmeans = x.fraction.kmeans,
+            cosine.similarity = x.cosine.similarity,
+            rank.product = rank.product[1],
+            p.value = p.value
+            );
         }
-
-    # After the while loop terminates, all remaining p-values are
-    # greater than `p.value.threshold`.  Replace any missing values or
-    # values greater than `p.value.threshold` in `p.values` with
-    # `p.value.threshold`.
-    p.values[is.na(p.values) | p.values > p.value.threshold] <- p.value.threshold;
 
     list(
         p.values = p.values,
-        outlier.statistics.list = outlier.statistics.list
+        results.list = results.list
         );
     }

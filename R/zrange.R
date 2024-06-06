@@ -16,6 +16,9 @@
 #'
 #' @noRd
 zrange <- function(x) {
+    if (all(is.na(x))) {
+        return(NA);
+        }
     zrange <- max(x, na.rm = TRUE) - min(x, na.rm = TRUE);
     zrange;
     }
