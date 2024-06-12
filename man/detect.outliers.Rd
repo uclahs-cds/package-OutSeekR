@@ -6,7 +6,7 @@
 \usage{
 detect.outliers(
   data,
-  num.null,
+  num.null = 1e+06,
   p.value.threshold = 0.05,
   fdr.threshold = 0.01,
   kmeans.nstart = 1
@@ -15,7 +15,7 @@ detect.outliers(
 \arguments{
 \item{data}{A matrix or data frame of normalized RNA-seq data, organized with transcripts on rows and samples on columns.  Transcript identifiers should be stored as \code{rownames(data)}.}
 
-\item{num.null}{The number of transcripts to generate when simulating from null distributions.}
+\item{num.null}{The number of transcripts to generate when simulating from null distributions; default is one million.}
 
 \item{p.value.threshold}{The p-value threshold for the outlier test; default is 0.05.  Once the p-value for a sample exceeds \code{p.value.threshold}, testing for that transcript ceases, and all remaining samples will have p-values equal to \code{NA}.}
 
