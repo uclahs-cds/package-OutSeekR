@@ -78,6 +78,130 @@ In most cases, the matrices `p.values` and `fdr` will contain entries with `NA`.
 
 # Example
 
-**OutSeekR** includes a sample data set called `outliers` that we shall use as an example. It is a data frame consisting of 50 samples across 500 transcripts.
+**OutSeekR** includes a sample data set called `outliers` that we shall use as an example. It is a data frame consisting of 50 samples across 500 transcripts. Note that transcript identifiers and sample identifiers are stored as `rownames(outliers)` and `colnames(outliers)`, respectively.
 
-An analysis in **OutSeekR** is run using the function `detect.outliers()`.
+```{r view-data}
+str(outliers, list.len = 5);
+outliers[1:6, 1:6];
+outliers[495:500, 45:50];
+```
+
+An analysis in **OutSeekR** is run using the function `detect.outliers()`. With default settings, it can be run by simply passing the input data set via the `data` parameter. Other parameters include the following:
+
+- `num.null`: the number of transcripts to generate when simulating from null distributions; default is one million.
+- `p.value.threshold`: the p-value threshold for the outlier test; default is 0.05.
+- `fdr.threshold`: the false discovery rate (FDR)-adjusted p-value threshold for determining the final count of outliers; default is 0.01.
+- `kmeans.nstart` the number of random starts when computing k-means fraction; default is 1. See `?stats::kmeans` for further details.
+
+In our first example, we pass the `outliers` data frame and use the defaults for most other parameters. To keep runtime manageable, we limit the number of null transcripts generated to 1,000. Prior to running `detect.outliers()`, we set up parallel processing. See [Parallelization in **OutSeekR**] for further details.
+
+```{r run-1}
+# Set random seed for reproducibility.
+set.seed(371892);
+
+# Set up parallel processing.
+future::plan(future::multisession);
+
+outlier.test.run.1 <- detect.outliers(
+    data = outliers,
+    num.null = 1e3
+    );
+
+str(outlier.test.run.1, max.level = 2);
+
+# Restore sequential processing.
+future::plan(future::sequential);
+```
+
+Unadjusted p-values for the outlier test on each sample in each transcript are contained in the `p.values` entry of the object returned by `detect.outliers()`; FDR-adjusted p-values are contained in the `fdr` entry. Both are matrices with the same number of rows and columns as the input data, and they retain the same row and column names.
+
+```{r examine-p-values}
+outlier.test.run.1$p.values[1:6, 8:14];
+outlier.test.run.1$fdr[1:6, 8:14];
+```
+
+Most of the elements of `p.values` and `fdr` will be `NA`. As explained in [Overview], testing for outliers for a given transcript stops after the first p-value is found that exceeds `p.value.threshold`. Because testing works from the most to least outlying sample, each p-value is guaranteed to be larger than the previous one. Thus, we can be sure that the missing p-values would also exceed our threshold. To ensure that the outlier test is run on each sample in each transcript, we could set the parameter `p.value.threshold` to `1`. However, this would dramatically increase the runtime of `detect.outliers()` and may not be practical in most cases.
+
+The entries `num.outliers.unadjusted` and `num.outliers.adjusted` give transcript-specific counts of the number of outliers before and after FDR adjustment of the outlier test p-values. For `num.outliers.unadjusted`, this corresponds to the number of p-values below `p.value.threshold`; for `num.outliers.adjusted`, this corresponds to the number of FDR-adjusted p-values below `fdr.threshold`. (Note that `fdr.threshold` only impacts the reported count of outliers; it has no effect on the FDR adjustment itself.)
+
+```{r transcript-level-outlier-counts}
+head(outlier.test.run.1$num.outliers.unadjusted);
+head(outlier.test.run.1$num.outliers.adjusted);
+```
+
+We can get a quick view of the distribution of the number of outliers across transcripts using `table()`:
+
+```{r table}
+table(outlier.test.run.1$num.outliers.unadjusted);
+table(outlier.test.run.1$num.outliers.adjusted);
+```
+
+More granular results can be found in the `outlier.test.results.list` entry of the object returned by `detect.outliers()`. It is a named list of data frames, where each reflects the results of a different 'round' of outlier testing; by 'round', we mean the process of excluding the most outlying sample (for all rounds except the first), calculating the five outlier statistics, ranking them alongside the statistics of the null data, computing the rank product, and computing the unadjusted p-value. Each data frame in `outlier.test.results.list` contains the transcript and sample identifiers, the five statistics calculated on the observed transcript, the rank product, and the unadjusted and FDR-adjusted p-value for the outlier test.
+
+```{r view-outlier-test-results-list}
+str(outlier.test.run.1$outlier.test.results.list);
+```
+
+Notice that the number of rows in each data frame decreases. This again reflects the fact that for a given transcript, testing for outliers stops once a sample has been found not to be an outlier. A transcript will appear in as many rounds as it has outliers (plus one).
+
+It may be of use to combine the results across all rounds of outlier testing into a single data frame. One way to do this (while retaining the round information) using `lapply()` and `rbind()` is shown below:
+
+```{r collapse-rounds}
+outlier.test.results.combined <- lapply(
+    X = seq_along(outlier.test.run.1$outlier.test.results.list),
+    FUN = function(i) {
+        df <- outlier.test.run.1$outlier.test.results.list[[i]];
+        df$round <- i;
+        df <- df[, c(
+            'round',
+            colnames(outlier.test.run.1$outlier.test.results.list[[i]])
+            )];
+        }
+    );
+outlier.test.results.combined <- do.call(
+    what = 'rbind',
+    args = outlier.test.results.combined
+    );
+# Combining the data frames produces duplicates in the row names.  R
+# will de-duplicate them, but as all the necessary information is
+# included in the columns of the data frame (specifically, 'round' and
+# 'transcript'), we'll simply discard the row names.
+rownames(outlier.test.results.combined) <- NULL;
+head(outlier.test.results.combined);
+```
+
+We can observe the optimal theoretical distribution for each transcript and the frequencies across all transcripts.
+
+```{r distributions}
+head(outlier.test.run.1$distributions);
+table(outlier.test.run.1$distributions);
+```
+
+The results are numeric codes, with 1 corresponding to the normal distribution, 2 the log-normal distribution, 3 the exponential distribution, and 4 the gamma distribution.
+
+Lastly, we show a second run of the algorithm where we adjust the p-value and FDR thresholds:
+
+```{r run-2}
+# Set up parallel processing.
+future::plan(future::multisession);
+
+outlier.test.run.2 <- detect.outliers(
+    data = outliers,
+    num.null = 1e3,
+    p.value.threshold = 0.25,
+    fdr.threshold = 0.05
+    );
+
+# Restore sequential processing.
+future::plan(future::sequential);
+
+str(outlier.test.run.2, max.level = 2);
+
+# Examine p-value and FDR matrices.
+outlier.test.run.2$p.values[1:6, 8:14];
+outlier.test.run.2$fdr[1:6, 8:14];
+
+# Check the distribution of number of outliers detected.
+table(outlier.test.run.2$num.outliers.unadjusted);
+table(outlier.test.run.2$num.outliers.adjusted);
+```
