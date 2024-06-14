@@ -5,3 +5,4 @@
 ^README\.md$
 metadata.yaml
 .cicd-env
+^data-raw$
