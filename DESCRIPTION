@@ -1,6 +1,6 @@
 Package: OutSeekR
 Type: Package
-Title: Algorithm to Detect Outliers
+Title: Statistical Approach to Outlier Detection in RNA-Seq and Related Data
 Version: 0.1.0
 Date: 2024-01-23
 Authors@R: c(
@@ -8,8 +8,10 @@ Authors@R: c(
     person("John", "Sahrmann", email = "jsahrmann@mednet.ucla.edu", role = "aut"),
     person("Paul", "Boutros", email = "pboutros@mednet.ucla.edu", role = c("aut", "cre", "cph"))
     )
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Description: An approach to outlier detection in RNA-seq and related data
+    based on five statistics. 'OutSeekR' implements an outlier test by comparing
+    the distributions of these statistics in observed data with those of
+    simulated null data.
 Depends: 
     R (>= 2.10)
 Imports:
