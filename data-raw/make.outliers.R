@@ -69,8 +69,8 @@ prep.outliers <- do.call(
     what = 'rbind',
     args = prep.outliers
     );
-rownames(prep.outliers) <- sprintf("T%03d", 1:nrow(prep.outliers));
-colnames(prep.outliers) <- sprintf("S%02d", 1:ncol(prep.outliers));
+rownames(prep.outliers) <- sprintf('T%03d', 1:nrow(prep.outliers));
+colnames(prep.outliers) <- sprintf('S%02d', 1:ncol(prep.outliers));
 
 outliers <- generate.outliers(
     data = prep.outliers,
