@@ -35,7 +35,7 @@
 #' r.dist <- identify.bic.optimal.residuals.distribution(
 #'     x = r.trimmed
 #'     );
-#' null <- simulate.null(
+#' null <- simulating.the.null(
 #'     x = x,
 #'     x.distribution = x.dist,
 #'     r = r.trimmed,
@@ -43,7 +43,8 @@
 #'     );
 #'
 #' @noRd
-simulate.null <- function(
+#' @export
+simulating.the.null <- function(
     x,
     x.distribution,
     r,

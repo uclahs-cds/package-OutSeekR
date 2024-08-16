@@ -1,6 +1,6 @@
-#' Identify optimal distribution of data
+#' Identify optimal distribution of residuals
 #'
-#' Identify which of four distributions---normal, log-normal, exponential, or gamma---best fits the given data according to BIC.
+#' Identify which of four distributions---normal, log-normal, exponential, or gamma---best fits the given vector of residuals according to BIC.
 #'
 #' @param x A numeric vector.
 #' @return A numeric code representing which distribution optimally fits `x`.  Possible values are
@@ -17,22 +17,27 @@
 #'     shape = 2,
 #'     scale = 2
 #'     );
-#' identify.bic.optimal.data.distribution(
+#' identifying.bic.optimal.residuals.distribution(
 #'     x = x
 #'     );
 #'
 #' @noRd
-identify.bic.optimal.data.distribution <- function(x) {
-    # Define a minimum value to ensure the values in `x` are strictly
+#' @export
+identifying.bic.optimal.residuals.distribution <- function(x) {
+    # Add a minimum value to ensure the values in `x` are strictly
     # positive.
-    add.minimum.value <- least.significant.digit(x);
-    x.trimmed <- trim.sample(x, 0.05)
-    x.trimmed.nozero <- x.trimmed + add.minimum.value;
+    add.minimum.value <- least.significant.digit(x)
+    if (min(x) < 0) {
+        x.nozero <- x - min(x) + add.minimum.value;
+        }
+    else {
+        x.nozero <- x + add.minimum.value;
+        }
 
     # Fit a model of each candidate distribution to the data.
     glm.norm <- suppressWarnings(
         expr = gamlss::gamlss(
-            formula = x.trimmed.nozero ~ 1,
+            formula = x.nozero ~ 1,
             family = gamlss.dist::NO(),
             control = gamlss::gamlss.control(
                 trace = FALSE
@@ -41,7 +46,7 @@ identify.bic.optimal.data.distribution <- function(x) {
         );
     glm.lnorm <- suppressWarnings(
         expr = gamlss::gamlss(
-            formula = x.trimmed.nozero ~ 1,
+            formula = x.nozero ~ 1,
             family = gamlss.dist::LNO(),
             control = gamlss::gamlss.control(
                 trace = FALSE
@@ -50,7 +55,7 @@ identify.bic.optimal.data.distribution <- function(x) {
         );
     glm.exp <- suppressWarnings(
         expr = gamlss::gamlss(
-            formula = x.trimmed.nozero ~ 1,
+            formula = x.nozero ~ 1,
             family = gamlss.dist::EXP(),
             control = gamlss::gamlss.control(
                 trace = FALSE
@@ -59,7 +64,7 @@ identify.bic.optimal.data.distribution <- function(x) {
         );
     glm.gamma <- suppressWarnings(
         expr = gamlss::gamlss(
-            formula = x.trimmed.nozero ~ 1,
+            formula = x.nozero ~ 1,
             family = gamlss.dist::GA(),
             control = gamlss::gamlss.control(
                 trace = FALSE

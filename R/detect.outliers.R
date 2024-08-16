@@ -30,7 +30,7 @@ detect.outliers <- function(
     optimal.distribution.data <- future.apply::future_apply(
         X = data,
         MARGIN = 1,
-        FUN = identify.bic.optimal.data.distribution,
+        FUN = identifying.bic.optimal.data.distribution,
         future.seed = TRUE
         );
     # Calculate residuals of the observed data with respect to the
@@ -62,7 +62,7 @@ detect.outliers <- function(
     optimal.distribution.residuals <- future.apply::future_apply(
         X = observed.residuals,
         MARGIN = 1,
-        FUN = identify.bic.optimal.residuals.distribution
+        FUN = identifying.bic.optimal.residuals.distribution
         );
 
     # Compute quantities for outlier detection: (1) z-scores based on
@@ -140,7 +140,7 @@ detect.outliers <- function(
     null.data <- future.apply::future_lapply(
         X = sampled.indices,
         FUN = function(i) {
-            simulate.null(
+            simulating.the.null(
                 x = as.numeric(data[i, ]),
                 x.distribution = optimal.distribution.data[i],
                 r = as.numeric(observed.residuals[i, ]),
@@ -160,7 +160,7 @@ detect.outliers <- function(
     optimal.distribution.null.data <- future.apply::future_apply(
         X = null.data,
         MARGIN = 1,
-        FUN = identify.bic.optimal.data.distribution,
+        FUN = identifying.bic.optimal.data.distribution,
         future.seed = TRUE
         );
 

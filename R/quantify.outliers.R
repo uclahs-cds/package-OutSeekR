@@ -75,6 +75,7 @@
 #'     );
 #'
 #' @noRd
+#' @export
 quantify.outliers <- function(x, method = 'mean', trim = 0, nstart = 1, exclude.zero = FALSE) {
     x.na <- stats::na.omit(x);
     if ('median' == method) {
@@ -208,6 +209,7 @@ quantify.outliers <- function(x, method = 'mean', trim = 0, nstart = 1, exclude.
 #'     );
 #'
 #' @noRd
+#' @export
 outlier.detection.cosine <- function(x, distribution) {
     # Define a minimum value to ensure the values in `x` are strictly
     # positive.

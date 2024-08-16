@@ -15,6 +15,7 @@
 #'     );
 #'
 #' @noRd
+#' @export
 zrange <- function(x) {
     if (all(is.na(x))) {
         return(NA);

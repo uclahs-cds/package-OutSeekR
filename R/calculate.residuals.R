@@ -30,6 +30,7 @@
 #'     );
 #'
 #' @noRd
+#' @export
 calculate.residuals <- function(x, distribution) {
     add.minimum.value <- least.significant.digit(x);
     # Add a minimum value to ensure the values in `x` are strictly

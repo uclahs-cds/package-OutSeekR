@@ -22,6 +22,7 @@
 #'     );
 #'
 #' @noRd
+#' @export
 kmeans.fraction <- function(x) {
     if (1 == length(unique(x))) {
         fraction <- NA;

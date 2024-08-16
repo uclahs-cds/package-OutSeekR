@@ -52,6 +52,7 @@
 #'     );
 #'
 #' @noRd
+#' @export
 outlier.rank <- function(outlier.statistic, method) {
     if (method %in% c('zrange.mean', 'zrange.median', 'zrange.trimmean')) {
         ranks <- rank(

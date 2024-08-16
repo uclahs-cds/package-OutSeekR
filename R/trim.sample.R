@@ -15,6 +15,7 @@
 #'     );
 #'
 #' @noRd
+#' @export
 trim.sample <- function(x, trim = 0.05) {
     x <- sort(x);
     if (length(x) <= 10) {

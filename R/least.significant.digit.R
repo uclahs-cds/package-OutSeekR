@@ -11,6 +11,7 @@
 #'     );
 #'
 #' @noRd
+#' @export
 least.significant.digit <- function(x) {
     decimal.number.max <- sapply(
         X = stats::na.omit(x),

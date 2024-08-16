@@ -22,6 +22,7 @@
 #' * `outlier.statistics.list`, a list of vectors containing the values of the outlier statistics calculated from the remaining samples.  The list will be of length equal to one plus the total number of outliers (i.e., the number of samples with an outlier test p-value less than `p.value.threshold`) and will contain entries `outlier.statistics.N`, where `N` is between zero and the total number of outliers.  `outlier.statistics.N` is the vector of outlier statistics after excluding the `N`th outlier sample, with `outlier.statistics.0` being for the complete transcript.
 #'
 #' @noRd
+#' @export
 calculate.p.values <- function(
     x,
     x.distribution,
