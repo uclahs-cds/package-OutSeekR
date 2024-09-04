@@ -18,12 +18,16 @@
 #'
 #' @export
 detect.outliers <- function(
-    data,
-    num.null = 1e6,
-    p.value.threshold = 0.05,
-    fdr.threshold = 0.01,
-    kmeans.nstart = 1
+        data,
+        num.null = 1e6,
+        initial.screen.method = c("p.value", "fdr"),
+        p.value.threshold = 0.05,
+        fdr.threshold = 0.01,
+        kmeans.nstart = 1
     ) {
+    # Match the initial screening method
+    initial.screen.method <- match.arg(initial.screen.method);
+    
     # Determine which of the normal, log-normal, exponential, or gamma
     # distributions provides the best fit to each row of values in
     # `data`.
@@ -64,7 +68,7 @@ detect.outliers <- function(
         MARGIN = 1,
         FUN = identify.bic.optimal.residuals.distribution
         );
-
+    
     # Compute quantities for outlier detection: (1) z-scores based on
     # the mean / standard deviation, (2) z-scores based on the trimmed
     # mean / trimmed standard deviation, (3) z-scores based on the
@@ -129,7 +133,7 @@ detect.outliers <- function(
                 );
             }
         );
-
+    
     # Generate a matrix of null transcripts by simulating from their
     # respective optimal distributions.
     sampled.indices <- sample(
@@ -163,7 +167,7 @@ detect.outliers <- function(
         FUN = identify.bic.optimal.data.distribution,
         future.seed = TRUE
         );
-
+    
     null.zrange.mean <- future.apply::future_apply(
         X = null.data,
         MARGIN = 1,
@@ -223,7 +227,7 @@ detect.outliers <- function(
                 );
             }
         );
-
+    
     # Calculate p-values.  The result is a list of length equal to
     # `nrow(data)`, with each sublist containing the results of
     # `calculate.p.values()` for a transcript in the observed data.
@@ -253,6 +257,293 @@ detect.outliers <- function(
             },
         future.seed = TRUE
         );
+    
+    
+    
+    k <- 1;
+    next.name <- paste0('round', k);
+    outlier.test.results.list <- list();
+    
+    
+    
+    
+    outlier.test.results.list[[next.name]] <- list();
+    for (j in seq_along(outlier.test.results)) {
+        outlier.test.results.list[[next.name]][[j]] <- getElement(
+            object = outlier.test.results[[j]]$results.list,
+            name = next.name
+            );
+        }
+    # Convert the list of one-row data frames to a data frame.
+    outlier.test.results.list[[next.name]] <- do.call(
+        what = rbind,
+        args = outlier.test.results.list[[next.name]]
+        );
+    
+    outlier.test.results.list[[next.name]]$fdr <- stats::p.adjust(
+        p = outlier.test.results.list[[next.name]]$p.value,
+        method = 'fdr'
+        );
+    
+    
+    if (initial.screen.method == "p.value") {
+        while (sum(outlier.test.results.list[[next.name]]$p.value < p.value.threshold) > 0) {
+            k <- k + 1;
+            next.name <- paste0('round', k);
+            outlier.test.results.iter <- future.apply::future_lapply(
+                X = seq_len(nrow(data)),
+                FUN = function(i) {
+                    x <- as.numeric(data[i, ]);
+                    names(x) <- colnames(data);
+                    
+                    # Sort x in decreasing order
+                    sorted_indices <- order(x, decreasing = TRUE);
+                    
+                    # Remove the top j-1 values (j-1 because we're keeping the j-th value and below)
+                    x <- x[sorted_indices[k:length(x)]];
+                    
+                    # The most abundant sample in this round is the j-th highest overall
+                    most.abundant.sample <- names(x)[1];
+                    
+                    # Compute quantities for outlier detection in the remaining
+                    # samples of the observed transcript.
+                    x.zrange.mean <- quantify.outliers(
+                        x = x,
+                        method = 'mean'
+                        );
+                    x.zrange.median <- quantify.outliers(
+                        x = x,
+                        method = 'median'
+                        );
+                    x.zrange.trimmean <- quantify.outliers(
+                        x = x,
+                        method = 'mean',
+                        trim = 0.05
+                        );
+                    x.fraction.kmeans <- quantify.outliers(
+                        x = x,
+                        method = 'kmeans',
+                        nstart = kmeans.nstart
+                        );
+                    # Compute the ranges of the z-score statistics.
+                    x.zrange.mean <- zrange(
+                        x = x.zrange.mean
+                        );
+                    x.zrange.median <- zrange(
+                        x = x.zrange.median
+                        );
+                    x.zrange.trimmean <- zrange(
+                        x = x.zrange.trimmean
+                        );
+                    # Compute the k-means fraction.
+                    x.fraction.kmeans <- kmeans.fraction(
+                        x = x.fraction.kmeans
+                        );
+                    # Compute the cosine similarity.
+                    x.cosine.similarity <- outlier.detection.cosine(
+                        x = x,
+                        distribution = optimal.distribution.data[i]
+                        );
+                    
+                    # Combine the recomputed outlier statistics from the remaining
+                    # samples of this observed transcript with those of the null
+                    # data.
+                    zrange.mean <- c(x.zrange.mean, null.zrange.mean);
+                    zrange.median <- c(x.zrange.median, null.zrange.median);
+                    zrange.trimmean <- c(x.zrange.trimmean, null.zrange.trimmean);
+                    fraction.kmeans <- c(x.fraction.kmeans, null.fraction.kmeans);
+                    cosine.similarity <- c(x.cosine.similarity, null.cosine.similarity);
+                    # Assign ranks within each method.
+                    rank.zrange.mean <- outlier.rank(
+                        outlier.statistic = zrange.mean,
+                        method = 'zrange.mean'
+                        );
+                    rank.zrange.median <- outlier.rank(
+                        outlier.statistic = zrange.median,
+                        method = 'zrange.median'
+                        );
+                    rank.zrange.trimmean <- outlier.rank(
+                        outlier.statistic = zrange.trimmean,
+                        method = 'zrange.trimmean'
+                        );
+                    rank.fraction.kmeans <- outlier.rank(
+                        outlier.statistic = fraction.kmeans,
+                        method = 'fraction.kmeans'
+                        );
+                    rank.cosine.similarity <- outlier.rank(
+                        outlier.statistic = cosine.similarity,
+                        method = 'cosine.similarity'
+                        );
+                    # Compute the rank product for each transcript.
+                    rank.product <- outlier.rank.product(
+                        zrange.mean = rank.zrange.mean,
+                        zrange.median = rank.zrange.median,
+                        zrange.trimmean = rank.zrange.trimmean,
+                        fraction.kmeans = rank.fraction.kmeans,
+                        cosine.similarity = rank.cosine.similarity
+                        );
+                    # Calculate the p-value associated with the most abundant sample
+                    # in `x`.
+                    p.value <- (sum(rank.product[1] >= rank.product[-1]) + 1) / length(rank.product);
+                    p.value[most.abundant.sample] <- p.value;
+                    # Create results dataframe
+                    data.frame(
+                        sample = most.abundant.sample,
+                        zrange.mean = x.zrange.mean,
+                        zrange.median = x.zrange.median,
+                        zrange.trimmean = x.zrange.trimmean,
+                        fraction.kmeans = x.fraction.kmeans,
+                        cosine.similarity = x.cosine.similarity,
+                        rank.product = rank.product[1],
+                        p.value = p.value[2]
+                        )
+                    },
+                future.seed = TRUE
+                )
+            
+            # Combine results from all genes
+            outlier.test.results.list[[next.name]] <- do.call(rbind, outlier.test.results.iter)
+            
+            # Calculate FDR
+            outlier.test.results.list[[next.name]]$fdr <- stats::p.adjust(
+                p = outlier.test.results.list[[next.name]]$p.value,
+                method = 'fdr'
+                )
+            }
+        } 
+    else {
+        while (sum(outlier.test.results.list[[next.name]]$fdr < fdr.threshold) > 0) {
+            k <- k + 1;
+            next.name <- paste0('round', k);
+            outlier.test.results.iter <- future.apply::future_lapply(
+                X = seq_len(nrow(data)),
+                FUN = function(i) {
+                    x <- as.numeric(data[i, ]);
+                    names(x) <- colnames(data);
+                    
+                    # Sort x in decreasing order
+                    sorted_indices <- order(x, decreasing = TRUE)
+                    
+                    # Remove the top j-1 values (j-1 because we're keeping the j-th value and below)
+                    x <- x[sorted_indices[k:length(x)]]
+                    
+                    # The most abundant sample in this round is the j-th highest overall
+                    most.abundant.sample <- names(x)[1]
+                    
+                    # Compute quantities for outlier detection in the remaining
+                    # samples of the observed transcript.
+                    x.zrange.mean <- quantify.outliers(
+                        x = x,
+                        method = 'mean'
+                        );
+                    x.zrange.median <- quantify.outliers(
+                        x = x,
+                        method = 'median'
+                        );
+                    x.zrange.trimmean <- quantify.outliers(
+                        x = x,
+                        method = 'mean',
+                        trim = 0.05
+                        );
+                    x.fraction.kmeans <- quantify.outliers(
+                        x = x,
+                        method = 'kmeans',
+                        nstart = kmeans.nstart
+                        );
+                    # Compute the ranges of the z-score statistics.
+                    x.zrange.mean <- zrange(
+                        x = x.zrange.mean
+                        );
+                    x.zrange.median <- zrange(
+                        x = x.zrange.median
+                        );
+                    x.zrange.trimmean <- zrange(
+                        x = x.zrange.trimmean
+                        );
+                    # Compute the k-means fraction.
+                    x.fraction.kmeans <- kmeans.fraction(
+                        x = x.fraction.kmeans
+                        );
+                    # Compute the cosine similarity.
+                    x.cosine.similarity <- outlier.detection.cosine(
+                        x = x,
+                        distribution = optimal.distribution.data[i]
+                        );
+                    
+                    # Combine the recomputed outlier statistics from the remaining
+                    # samples of this observed transcript with those of the null
+                    # data.
+                    zrange.mean <- c(x.zrange.mean, null.zrange.mean);
+                    zrange.median <- c(x.zrange.median, null.zrange.median);
+                    zrange.trimmean <- c(x.zrange.trimmean, null.zrange.trimmean);
+                    fraction.kmeans <- c(x.fraction.kmeans, null.fraction.kmeans);
+                    cosine.similarity <- c(x.cosine.similarity, null.cosine.similarity);
+                    # Assign ranks within each method.
+                    rank.zrange.mean <- outlier.rank(
+                        outlier.statistic = zrange.mean,
+                        method = 'zrange.mean'
+                        );
+                    rank.zrange.median <- outlier.rank(
+                        outlier.statistic = zrange.median,
+                        method = 'zrange.median'
+                        );
+                    rank.zrange.trimmean <- outlier.rank(
+                        outlier.statistic = zrange.trimmean,
+                        method = 'zrange.trimmean'
+                        );
+                    rank.fraction.kmeans <- outlier.rank(
+                        outlier.statistic = fraction.kmeans,
+                        method = 'fraction.kmeans'
+                        );
+                    rank.cosine.similarity <- outlier.rank(
+                        outlier.statistic = cosine.similarity,
+                        method = 'cosine.similarity'
+                        );
+                    # Compute the rank product for each transcript.
+                    rank.product <- outlier.rank.product(
+                        zrange.mean = rank.zrange.mean,
+                        zrange.median = rank.zrange.median,
+                        zrange.trimmean = rank.zrange.trimmean,
+                        fraction.kmeans = rank.fraction.kmeans,
+                        cosine.similarity = rank.cosine.similarity
+                        );
+                    # Calculate the p-value associated with the most abundant sample
+                    # in `x`.
+                    p.value <- (sum(rank.product[1] >= rank.product[-1]) + 1) / length(rank.product);
+                    p.value[most.abundant.sample] <- p.value;
+                    # Create results dataframe
+                    data.frame(
+                        sample = most.abundant.sample,
+                        zrange.mean = x.zrange.mean,
+                        zrange.median = x.zrange.median,
+                        zrange.trimmean = x.zrange.trimmean,
+                        fraction.kmeans = x.fraction.kmeans,
+                        cosine.similarity = x.cosine.similarity,
+                        rank.product = rank.product[1],
+                        p.value = p.value[2]
+                        )
+                    },
+                future.seed = TRUE
+                )
+            
+            # Combine results from all genes
+            outlier.test.results.list[[next.name]] <- do.call(rbind, outlier.test.results.iter)
+            
+            # Calculate FDR
+            outlier.test.results.list[[next.name]]$fdr <- stats::p.adjust(
+                p = outlier.test.results.list[[next.name]]$p.value,
+                method = 'fdr'
+                )
+            }
+        }
+    
+    # Give rownames
+    for (i in 1:length(outlier.test.results.list)) {
+        rownames(outlier.test.results.list[[i]]) <- rownames(data);
+        }
+    
+
+    
     #
     # Prepare output
     #
@@ -262,111 +553,78 @@ detect.outliers <- function(
     # corresponding to a different transcript.  We extract these
     # entries and then `rbind()` them to form a matrix.
     p.values <- do.call(
-        what = rbind,
+        what = cbind,
         args = lapply(
-            X = outlier.test.results,
+            X = outlier.test.results.list,
             FUN = function(x) {
                 getElement(
                     object = x,
-                    name = 'p.values'
+                    name = 'p.value'
                     );
                 }
             )
         );
     rownames(p.values) <- rownames(data);
-    # Get counts of the number of outliers per transcript based on the
-    # unadjusted p-values from the outlier test.
-    num.outliers.unadjusted <- apply(
-        X = p.values,
-        MARGIN = 1,
-        FUN = function(x) sum(x < p.value.threshold, na.rm = TRUE)
-        );
-    # Create a list of outlier test results data frames.  (See the
-    # documentation for the return value of this function for details
-    # of its structure.)
-    outlier.test.results.list <- list();
-    for (i in 1:(max(num.outliers.unadjusted) + 1)) {
-        next.name <- paste0('round', i);
-        outlier.test.results.list[[next.name]] <- list();
-        for (j in seq_along(outlier.test.results)) {
-            outlier.test.results.list[[next.name]][[j]] <- getElement(
-                object = outlier.test.results[[j]],
-                name = c(
-                    'results.list',
-                    paste0('round', i)
-                    )
-                );
-            }
-        # Convert the list of one-row data frames to a data frame.
-        outlier.test.results.list[[next.name]] <- do.call(
-            what = rbind,
-            args = outlier.test.results.list[[next.name]]
-            );
-        # Adjust the p-values from this round of results using the
-        # false discovery rate (FDR).
-        outlier.test.results.list[[next.name]]$fdr <- stats::p.adjust(
-            p = outlier.test.results.list[[next.name]]$p.value,
-            method = 'fdr'
-            );
-        # Add transcript name to the data frame as the row names and
-        # as a dedicated column.
-        outlier.test.results.list[[next.name]]$transcript <- names(num.outliers.unadjusted[num.outliers.unadjusted >= (i - 1)]);
-        outlier.test.results.list[[next.name]] <- outlier.test.results.list[[next.name]][, c('transcript', colnames(outlier.test.results.list[[next.name]])['transcript' != colnames(outlier.test.results.list[[next.name]])])];
-        rownames(outlier.test.results.list[[next.name]]) <- names(num.outliers.unadjusted[num.outliers.unadjusted >= (i - 1)]);
-        }
+    
+    # # Get counts of the number of outliers per transcript based on the
+    # # unadjusted p-values from the outlier test.
+    # num.outliers.unadjusted <- apply(
+    #     X = p.values,
+    #     MARGIN = 1,
+    #     FUN = function(x) sum(x < p.value.threshold, na.rm = TRUE)
+    # );
+    # 
+    
+    
     # Assemble a matrix of FDR-adjusted p-values for each transcript
     # and sample.
-    fdr <- matrix(
-        data = NA,
-        nrow = nrow(data),
-        ncol = ncol(data),
-        dimnames = list(
-            rownames(data),
-            colnames(data)
+    fdr <- do.call(
+        what = cbind,
+        args = lapply(
+            X = outlier.test.results.list,
+            FUN = function(x) {
+                getElement(
+                    object = x,
+                    name = 'fdr'
+                    );
+                }
             )
         );
-    # Combine the data frames of outlier test results across rounds.
-    # Keep only the transcript names (the rows of the matrix `fdr`),
-    # the sample names (the columns of the matrix `fdr`), and the
-    # FDR-adjusted p-values.
-    all.results <- do.call(
-        what = rbind,
-        args = outlier.test.results.list
-        );
-    all.results <- all.results[, c('transcript', 'sample', 'fdr')];
-    # Reshape from long to wide format.
-    temp.fdr <- stats::reshape(
-        data = all.results,
-        direction = 'wide',
-        idvar = 'transcript',
-        timevar = 'sample'
-        );
-    rownames(temp.fdr) <- temp.fdr$transcript;
-    temp.fdr$transcript <- NULL;
-    # Drop the prefix 'fdr.' from the column names.
-    colnames(temp.fdr) <- sub(
-        pattern = 'fdr.',
-        replacement = '',
-        x = colnames(temp.fdr),
-        fixed = TRUE
-        );
-    temp.fdr <- as.matrix(temp.fdr);
-    # Fill in `fdr` with the FDR-adjusted p-values.
-    fdr[rownames(temp.fdr), colnames(temp.fdr)] <- temp.fdr;
-    # Get counts of the number of outliers per transcript based on the
-    # FDR-adjusted p-values.
-    num.outliers.adjusted <- apply(
-        X = fdr,
-        MARGIN = 1,
-        FUN = function(x) sum(x < fdr.threshold, na.rm = TRUE)
-        );
-
+    rownames(fdr) <- rownames(data);
+    
+    
+    
+    # # Get counts of the number of outliers per transcript based on the
+    # # FDR-adjusted p-values.
+    # num.outliers.adjusted <- apply(
+    #     X = fdr,
+    #     MARGIN = 1,
+    #     FUN = function(x) sum(x < fdr.threshold, na.rm = TRUE)
+    # );
+    
+    # Calculate outliers based on the chosen method
+    if (initial.screen.method == "p.value") {
+        num.outliers <- apply(
+            X = p.values,
+            MARGIN = 1,
+            FUN = function(x) sum(x < p.value.threshold, na.rm = TRUE)
+            )
+        } 
+    else {  # initial.screen.method == "fdr"
+        num.outliers <- apply(
+            X = fdr,
+            MARGIN = 1,
+            FUN = function(x) sum(x < fdr.threshold, na.rm = TRUE)
+            )
+        }
+    
+    
     list(
         p.values = p.values,
         fdr = fdr,
-        num.outliers.unadjusted = num.outliers.unadjusted,
-        num.outliers.adjusted = num.outliers.adjusted,
+        num.outliers = num.outliers,
         outlier.test.results.list = outlier.test.results.list,
-        distributions = optimal.distribution.data
+        distributions = optimal.distribution.data,
+        initial.screen.method = initial.screen.method
         );
     }

@@ -87,6 +87,11 @@ calculate.p.values <- function(
     # in `x`.
     p.value <- (sum(rank.product[1] >= rank.product[-1]) + 1) / length(rank.product);
     p.values[most.abundant.sample] <- p.value;
+    # # Record results for the remaining samples in `x`.
+    # next.entry.name <- paste0(
+    #     'round',
+    #     length(results.list) + 1
+    #     );
     # Record results for the original `x`.
     results.list[['round1']] <- data.frame(
         sample = most.abundant.sample,
@@ -98,111 +103,6 @@ calculate.p.values <- function(
         rank.product = rank.product[1],
         p.value = p.value
         );
-
-    while (p.value < p.value.threshold) {
-        # Remove the most abundant sample from `x`.
-        x <- x[-index.most.abundant.sample];
-        # Get the name and index of the next most abundant sample.
-        index.most.abundant.sample <- which.max(x);
-        most.abundant.sample <- names(x)[index.most.abundant.sample];
-
-        # Compute quantities for outlier detection in the remaining
-        # samples of the observed transcript.
-        x.zrange.mean <- quantify.outliers(
-            x = x,
-            method = 'mean'
-            );
-        x.zrange.median <- quantify.outliers(
-            x = x,
-            method = 'median'
-            );
-        x.zrange.trimmean <- quantify.outliers(
-            x = x,
-            method = 'mean',
-            trim = 0.05
-            );
-        x.fraction.kmeans <- quantify.outliers(
-            x = x,
-            method = 'kmeans',
-            nstart = kmeans.nstart
-            );
-        # Compute the ranges of the z-score statistics.
-        x.zrange.mean <- zrange(
-            x = x.zrange.mean
-            );
-        x.zrange.median <- zrange(
-            x = x.zrange.median
-            );
-        x.zrange.trimmean <- zrange(
-            x = x.zrange.trimmean
-            );
-        # Compute the k-means fraction.
-        x.fraction.kmeans <- kmeans.fraction(
-            x = x.fraction.kmeans
-            );
-        # Compute the cosine similarity.
-        x.cosine.similarity <- outlier.detection.cosine(
-            x = x,
-            distribution = x.distribution
-            );
-
-        # Combine the recomputed outlier statistics from the remaining
-        # samples of this observed transcript with those of the null
-        # data.
-        zrange.mean <- c(x.zrange.mean, null.zrange.mean);
-        zrange.median <- c(x.zrange.median, null.zrange.median);
-        zrange.trimmean <- c(x.zrange.trimmean, null.zrange.trimmean);
-        fraction.kmeans <- c(x.fraction.kmeans, null.fraction.kmeans);
-        cosine.similarity <- c(x.cosine.similarity, null.cosine.similarity);
-        # Assign ranks within each method.
-        rank.zrange.mean <- outlier.rank(
-            outlier.statistic = zrange.mean,
-            method = 'zrange.mean'
-            );
-        rank.zrange.median <- outlier.rank(
-            outlier.statistic = zrange.median,
-            method = 'zrange.median'
-            );
-        rank.zrange.trimmean <- outlier.rank(
-            outlier.statistic = zrange.trimmean,
-            method = 'zrange.trimmean'
-            );
-        rank.fraction.kmeans <- outlier.rank(
-            outlier.statistic = fraction.kmeans,
-            method = 'fraction.kmeans'
-            );
-        rank.cosine.similarity <- outlier.rank(
-            outlier.statistic = cosine.similarity,
-            method = 'cosine.similarity'
-            );
-        # Compute the rank product for each transcript.
-        rank.product <- outlier.rank.product(
-            zrange.mean = rank.zrange.mean,
-            zrange.median = rank.zrange.median,
-            zrange.trimmean = rank.zrange.trimmean,
-            fraction.kmeans = rank.fraction.kmeans,
-            cosine.similarity = rank.cosine.similarity
-            );
-        # Calculate the p-value associated with the most abundant sample
-        # in `x`.
-        p.value <- (sum(rank.product[1] >= rank.product[-1]) + 1) / length(rank.product);
-        p.values[most.abundant.sample] <- p.value;
-        # Record results for the remaining samples in `x`.
-        next.entry.name <- paste0(
-            'round',
-            length(results.list) + 1
-            );
-        results.list[[next.entry.name]] <- data.frame(
-            sample = most.abundant.sample,
-            zrange.mean = x.zrange.mean,
-            zrange.median = x.zrange.median,
-            zrange.trimmean = x.zrange.trimmean,
-            fraction.kmeans = x.fraction.kmeans,
-            cosine.similarity = x.cosine.similarity,
-            rank.product = rank.product[1],
-            p.value = p.value
-            );
-        }
 
     list(
         p.values = p.values,
