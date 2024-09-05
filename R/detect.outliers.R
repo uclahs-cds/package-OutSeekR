@@ -28,6 +28,16 @@ detect.outliers <- function(
     # Match the initial screening method
     initial.screen.method <- match.arg(initial.screen.method);
     
+    # Move to the later part after test
+    data.fraction.kmeans <- future.apply::future_apply(
+        X = data,
+        MARGIN = 1,
+        FUN = quantify.outliers,
+        method = 'kmeans',
+        nstart = kmeans.nstart,
+        future.seed = TRUE
+        );
+    
     # Determine which of the normal, log-normal, exponential, or gamma
     # distributions provides the best fit to each row of values in
     # `data`.
@@ -93,14 +103,16 @@ detect.outliers <- function(
         method = 'mean',
         trim = 0.05
         );
-    data.fraction.kmeans <- future.apply::future_apply(
-        X = data,
-        MARGIN = 1,
-        FUN = quantify.outliers,
-        method = 'kmeans',
-        nstart = kmeans.nstart,
-        future.seed = TRUE
-        );
+    
+    # # Move to the first part to test the kmeans.start
+    # data.fraction.kmeans <- future.apply::future_apply(
+    #     X = data,
+    #     MARGIN = 1,
+    #     FUN = quantify.outliers,
+    #     method = 'kmeans',
+    #     nstart = kmeans.nstart,
+    #     future.seed = TRUE
+    #     );
     # Compute the ranges of the z-score statistics.
     data.zrange.mean <- future.apply::future_apply(
         X = data.zrange.mean,
