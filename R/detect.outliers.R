@@ -299,7 +299,7 @@ detect.outliers <- function(
     
     
     if (initial.screen.method == "p.value") {
-        while (sum(outlier.test.results.list[[next.name]]$p.value < p.value.threshold) > 0) {
+        while (sum(na.omit(outlier.test.results.list[[next.name]]$p.value) < p.value.threshold) > 0) {
             k <- k + 1;
             next.name <- paste0('round', k);
             outlier.test.results.iter <- future.apply::future_lapply(
@@ -424,7 +424,7 @@ detect.outliers <- function(
             }
         } 
     else {
-        while (sum(outlier.test.results.list[[next.name]]$fdr < fdr.threshold) > 0) {
+        while (sum(na.omit(outlier.test.results.list[[next.name]]$fdr) < fdr.threshold) > 0) {
             k <- k + 1;
             next.name <- paste0('round', k);
             outlier.test.results.iter <- future.apply::future_lapply(
