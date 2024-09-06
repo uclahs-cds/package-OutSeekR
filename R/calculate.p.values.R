@@ -100,6 +100,7 @@ calculate.p.values <- function(
         p.value = p.value
         );
 
+    if (is.na(p.value)) { p.value <- 1 }
     while (p.value < p.value.threshold) {
         # Remove the most abundant sample from `x`.
         x <- x[-index.most.abundant.sample];
