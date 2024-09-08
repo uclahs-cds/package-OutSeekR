@@ -62,7 +62,7 @@ simulate.null <- function(
     # distribution for this transcript.
     if (1 == x.distribution) {
         norm.mean <- mean(x.nozero.trim);
-        norm.sd <- stats::sd(x.trim);
+        norm.sd <- stats::sd(x.nozero.trim);
         simulated.null <- truncnorm::rtruncnorm(
             n = length(x),
             mean = norm.mean,
