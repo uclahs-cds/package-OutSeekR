@@ -56,8 +56,8 @@ simulate.null <- function(
     add.minimum.value <- least.significant.digit(x);
     x.nozero <- x + add.minimum.value;
     # Apply 5% trimming.
-    x.trim <- trim.sample(x);
-    x.nozero.trim <- trim.sample(x.trim);
+    # x.trim <- trim.sample(x);
+    x.nozero.trim <- trim.sample(x.nozero);
     # Generate null values according to the optimal
     # distribution for this transcript.
     if (1 == x.distribution) {
