@@ -20,24 +20,14 @@
 detect.outliers <- function(
         data,
         num.null = 1e6,
-        initial.screen.method = c("p.value", "fdr"),
+        initial.screen.method = c('p.value', 'fdr'),
         p.value.threshold = 0.05,
         fdr.threshold = 0.01,
         kmeans.nstart = 1
     ) {
     # Match the initial screening method
     initial.screen.method <- match.arg(initial.screen.method);
-    
-    # Move to the later part after test
-    data.fraction.kmeans <- future.apply::future_apply(
-        X = data,
-        MARGIN = 1,
-        FUN = quantify.outliers,
-        method = 'kmeans',
-        nstart = kmeans.nstart,
-        future.seed = TRUE
-        );
-    
+
     # Determine which of the normal, log-normal, exponential, or gamma
     # distributions provides the best fit to each row of values in
     # `data`.
@@ -103,16 +93,14 @@ detect.outliers <- function(
         method = 'mean',
         trim = 0.05
         );
-    
-    # # Move to the first part to test the kmeans.start
-    # data.fraction.kmeans <- future.apply::future_apply(
-    #     X = data,
-    #     MARGIN = 1,
-    #     FUN = quantify.outliers,
-    #     method = 'kmeans',
-    #     nstart = kmeans.nstart,
-    #     future.seed = TRUE
-    #     );
+    data.fraction.kmeans <- future.apply::future_apply(
+        X = data,
+        MARGIN = 1,
+        FUN = quantify.outliers,
+        method = 'kmeans',
+        nstart = kmeans.nstart,
+        future.seed = TRUE
+        );
     # Compute the ranges of the z-score statistics.
     data.zrange.mean <- future.apply::future_apply(
         X = data.zrange.mean,
@@ -268,35 +256,22 @@ detect.outliers <- function(
             },
         future.seed = TRUE
         );
-    
-    
-
     outlier.test.results.list <- list();
-    
-    # # Record results for the remaining samples in `x`.
-    # next.entry.name <- paste0(
-    #     'round',
-    #     length(outlier.test.results.list) + 1
-    #     );
-   
     k <- 1;
     # Record results for the remaining samples in `x`.
     next.name <- paste0(
         'round',
         k
         );
-    
-     # Combine results from all genes
+    # Combine results from all genes
     outlier.test.results.list[[next.name]] <- do.call(rbind, outlier.test.results)
-    
     # Calculate FDR
     outlier.test.results.list[[next.name]]$fdr <- stats::p.adjust(
         p = outlier.test.results.list[[next.name]]$p.value,
         method = 'fdr'
         );
 
-    
-    if (initial.screen.method == "p.value") {
+    if (initial.screen.method == 'p.value') {
         while (sum(na.omit(outlier.test.results.list[[next.name]]$p.value) < p.value.threshold) > 0) {
             k <- k + 1;
             next.name <- paste0('round', k);
@@ -305,16 +280,12 @@ detect.outliers <- function(
                 FUN = function(i) {
                     x <- as.numeric(data[i, ]);
                     names(x) <- colnames(data);
-                    
                     # Sort x in decreasing order
                     sorted_indices <- order(x, decreasing = TRUE);
-                    
                     # Remove the top j-1 values (j-1 because we're keeping the j-th value and below)
                     x <- x[sorted_indices[k:length(x)]];
-                    
                     # The most abundant sample in this round is the j-th highest overall
                     most.abundant.sample <- names(x)[1];
-                    
                     # Compute quantities for outlier detection in the remaining
                     # samples of the observed transcript.
                     x.zrange.mean <- quantify.outliers(
@@ -354,7 +325,6 @@ detect.outliers <- function(
                         x = x,
                         distribution = optimal.distribution.data[i]
                         );
-                    
                     calculate.p.values(
                         x = x,
                         x.distribution = optimal.distribution.data[i],
@@ -393,13 +363,10 @@ detect.outliers <- function(
                 FUN = function(i) {
                     x <- as.numeric(data[i, ]);
                     names(x) <- colnames(data);
-                    
                     # Sort x in decreasing order
                     sorted_indices <- order(x, decreasing = TRUE);
-                    
                     # Remove the top j-1 values (j-1 because we're keeping the j-th value and below)
                     x <- x[sorted_indices[k:length(x)]];
-                    
                     # The most abundant sample in this round is the j-th highest overall
                     most.abundant.sample <- names(x)[1];
                     
@@ -442,7 +409,6 @@ detect.outliers <- function(
                         x = x,
                         distribution = optimal.distribution.data[i]
                         );
-                    
                     calculate.p.values(
                         x = x,
                         x.distribution = optimal.distribution.data[i],
@@ -460,11 +426,9 @@ detect.outliers <- function(
                         );
                     },
                 future.seed = TRUE
-                )
-            
+                );
             # Combine results from all genes
             outlier.test.results.list[[next.name]] <- do.call(rbind, outlier.test.results.iter);
-            
             # Calculate FDR
             outlier.test.results.list[[next.name]]$fdr <- stats::p.adjust(
                 p = outlier.test.results.list[[next.name]]$p.value,
@@ -477,8 +441,6 @@ detect.outliers <- function(
     for (i in 1:length(outlier.test.results.list)) {
         rownames(outlier.test.results.list[[i]]) <- rownames(data);
         }
-    
-
     
     #
     # Prepare output
@@ -502,16 +464,6 @@ detect.outliers <- function(
         );
     rownames(p.values) <- rownames(data);
     
-    # # Get counts of the number of outliers per transcript based on the
-    # # unadjusted p-values from the outlier test.
-    # num.outliers.unadjusted <- apply(
-    #     X = p.values,
-    #     MARGIN = 1,
-    #     FUN = function(x) sum(x < p.value.threshold, na.rm = TRUE)
-    # );
-    # 
-    
-    
     # Assemble a matrix of FDR-adjusted p-values for each transcript
     # and sample.
     fdr <- do.call(
@@ -528,8 +480,6 @@ detect.outliers <- function(
         );
     rownames(fdr) <- rownames(data);
     
-    
-    
     # # Get counts of the number of outliers per transcript based on the
     # # FDR-adjusted p-values.
     # num.outliers.adjusted <- apply(
@@ -537,7 +487,6 @@ detect.outliers <- function(
     #     MARGIN = 1,
     #     FUN = function(x) sum(x < fdr.threshold, na.rm = TRUE)
     # );
-    
     # Calculate outliers based on the chosen method
     if (initial.screen.method == "p.value") {
         num.outliers <- apply(
@@ -551,9 +500,8 @@ detect.outliers <- function(
             X = fdr,
             MARGIN = 1,
             FUN = function(x) sum(x < fdr.threshold, na.rm = TRUE)
-            )
+            );
         }
-    
     
     list(
         p.values = p.values,

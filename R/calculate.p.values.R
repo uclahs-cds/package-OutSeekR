@@ -14,7 +14,6 @@
 #' @param null.zrange.trimmean A numeric vector, the ranges of the z-scores calculated using the trimmed mean and trimmed standard deviation of each transcript in the null data.
 #' @param null.fraction.kmeans A numeric vector, the k-means fraction of each transcript in the null data.
 #' @param null.cosine.similarity A numeric vector, the cosine similarity of each transcript in the null data.
-#' @param p.value.threshold The p-value threshold for the outlier test; default is 0.05.  Once the p-value for a sample exceeds `p.value.threshold`, testing ceases, and all samples (including the one that initially exceeded `p.value.threshold`) are assigned p-values equal to `p.value.threshold`.
 #' @param kmeans.nstart The number of random starts when computing k-means fraction; default is 1.  See `?stats::kmeans` for further details.
 #'
 #' @return A list consisting of the following entries:
@@ -37,11 +36,10 @@ calculate.p.values <- function(
     null.cosine.similarity,
     kmeans.nstart = 1
     ) {
-
     # Get the name and index of the most abundant sample in `x`.
     index.most.abundant.sample <- which.max(x);
     most.abundant.sample <- names(x)[index.most.abundant.sample];
- 
+
     # Combine the outlier statistics from this observed transcript
     # with those of the null data.
     zrange.mean <- c(x.zrange.mean, null.zrange.mean);
@@ -92,8 +90,5 @@ calculate.p.values <- function(
         cosine.similarity = x.cosine.similarity,
         rank.product = rank.product[1],
         p.value = p.value
-        )
+        );
     }
-
-
-
