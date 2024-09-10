@@ -35,18 +35,13 @@ calculate.p.values <- function(
     null.zrange.trimmean,
     null.fraction.kmeans,
     null.cosine.similarity,
-    p.value.threshold = 0.05,
     kmeans.nstart = 1
     ) {
-    p.values <- rep(NA, length(x));
-    names(p.values) <- names(x);
+
     # Get the name and index of the most abundant sample in `x`.
     index.most.abundant.sample <- which.max(x);
     most.abundant.sample <- names(x)[index.most.abundant.sample];
-    # Initialize a list to store the results of the outlier testing at
-    # each round.
-    results.list <- list();
-
+ 
     # Combine the outlier statistics from this observed transcript
     # with those of the null data.
     zrange.mean <- c(x.zrange.mean, null.zrange.mean);
@@ -86,14 +81,9 @@ calculate.p.values <- function(
     # Calculate the p-value associated with the most abundant sample
     # in `x`.
     p.value <- (sum(rank.product[1] >= rank.product[-1]) + 1) / length(rank.product);
-    p.values[most.abundant.sample] <- p.value;
-    # # Record results for the remaining samples in `x`.
-    # next.entry.name <- paste0(
-    #     'round',
-    #     length(results.list) + 1
-    #     );
+
     # Record results for the original `x`.
-    results.list[['round1']] <- data.frame(
+    data.frame(
         sample = most.abundant.sample,
         zrange.mean = x.zrange.mean,
         zrange.median = x.zrange.median,
@@ -102,10 +92,8 @@ calculate.p.values <- function(
         cosine.similarity = x.cosine.similarity,
         rank.product = rank.product[1],
         p.value = p.value
-        );
-
-    list(
-        p.values = p.values,
-        results.list = results.list
-        );
+        )
     }
+
+
+
