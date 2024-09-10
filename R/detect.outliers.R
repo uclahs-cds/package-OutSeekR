@@ -281,17 +281,17 @@ detect.outliers <- function(
    
     k <- 1;
     # Record results for the remaining samples in `x`.
-    next.entry.name <- paste0(
+    next.name <- paste0(
         'round',
         k
         );
     
      # Combine results from all genes
-    outlier.test.results.list[[next.entry.name]] <- do.call(rbind, outlier.test.results)
+    outlier.test.results.list[[next.name]] <- do.call(rbind, outlier.test.results)
     
     # Calculate FDR
-    outlier.test.results.list[[next.entry.name]]$fdr <- stats::p.adjust(
-        p = outlier.test.results.list[[next.entry.name]]$p.value,
+    outlier.test.results.list[[next.name]]$fdr <- stats::p.adjust(
+        p = outlier.test.results.list[[next.name]]$p.value,
         method = 'fdr'
         );
 
