@@ -72,7 +72,7 @@ The output of the main function in **OutSeekR**, `detect.outliers()`, is a named
 - `p.values`: a matrix of unadjusted p-values for the outlier test run on each transcript in the observed data.
 - `fdr`: a matrix of FDR-adjusted p-values for the outlier test run on each transcript in the observed data.
 - `num.outliers`: a vector giving the number of outliers detected for each transcript based on the threshold.
-- `outlier.test.results.list`: a list of length `max(num.outliers.unadjusted) + 1` containing entries `roundN`, where `N` is between one and `max(num.outliers.unadjusted) + 1`.  `roundN` is the data frame of results for the outlier test after excluding the $(N-1)$th outlier sample, with `round1` being for the original data set (i.e., before excluding any outlier samples).  A transcript will only appear in the data frames up to the total number of outliers in that transcript plus one; for example, a transcript with one outlier will appear in `round1` and `round2`, a transcript with two outliers will appear in `round1`, `round2`, and `round3`.  All transcripts appear in `round1`.
+- `outlier.test.results.list`: a list of length `max(num.outliers.unadjusted) + 1` containing entries `roundN`, where `N` is between one and `max(num.outliers.unadjusted) + 1`.  `roundN` is the data frame of results for the outlier test after excluding the $(N-1)$th outlier sample, with `round1` being for the original data set (i.e., before excluding any outlier samples).
 - `distributions`: a numeric vector indicating the optimal distribution for each transcript. Possible values are 1 (normal), 2 (log-normal), 3 (exponential), and 4 (gamma).
 - `initial.screen.method`: Specifies the statistical criterion for initial feature selection. Valid options are 'p-value' and 'FDR'.
 
@@ -89,7 +89,7 @@ outliers[495:500, 45:50];
 An analysis in **OutSeekR** is run using the function `detect.outliers()`. With default settings, it can be run by simply passing the input data set via the `data` parameter. Other parameters include the following:
 
 - `num.null`: the number of transcripts to generate when simulating from null distributions; default is one million.
-- `initial.screen.method`: the statistical criterion for initial feature selection.
+- `initial.screen.method`: the statistical criterion for initial gene selection.
 - `p.value.threshold`: the p-value threshold for the outlier test; default is 0.05.
 - `fdr.threshold`: the false discovery rate (FDR)-adjusted p-value threshold for determining the final count of outliers; default is 0.01.
 - `kmeans.nstart`: the number of random starts when computing k-means fraction; default is 1. See `?stats::kmeans` for further details.
