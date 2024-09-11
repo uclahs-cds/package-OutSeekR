@@ -69,14 +69,12 @@ The statistical approach to outlier detection implemented by **OutSeekR** is tim
 
 The output of the main function in **OutSeekR**, `detect.outliers()`, is a named list with the following components:
 
-- `p.values`: a matrix of unadjusted p-values for the outlier test run on each sample for each transcript in the observed data.
-- `fdr`: a matrix of FDR-adjusted p-values for the outlier test run on each sample for each transcript in the observed data.
-- `num.outliers.unadjusted`: a vector giving the number of outliers detected for each transcript based on the unadjusted p-values.
-- `num.outliers.adjusted`: a vector giving the number of outliers detected for each transcript based on the FDR-adjusted p-values.
+- `p.values`: a matrix of unadjusted p-values for the outlier test run on each transcript in the observed data.
+- `fdr`: a matrix of FDR-adjusted p-values for the outlier test run on each transcript in the observed data.
+- `num.outliers`: a vector giving the number of outliers detected for each transcript based on the threshold.
 - `outlier.test.results.list`: a list of length `max(num.outliers.unadjusted) + 1` containing entries `roundN`, where `N` is between one and `max(num.outliers.unadjusted) + 1`.  `roundN` is the data frame of results for the outlier test after excluding the $(N-1)$th outlier sample, with `round1` being for the original data set (i.e., before excluding any outlier samples).  A transcript will only appear in the data frames up to the total number of outliers in that transcript plus one; for example, a transcript with one outlier will appear in `round1` and `round2`, a transcript with two outliers will appear in `round1`, `round2`, and `round3`.  All transcripts appear in `round1`.
 - `distributions`: a numeric vector indicating the optimal distribution for each transcript. Possible values are 1 (normal), 2 (log-normal), 3 (exponential), and 4 (gamma).
-
-In most cases, the matrices `p.values` and `fdr` will contain entries with `NA`. These represent samples for a given transcript where the outlier test was not run because another sample was previously found not to be an outlier. See [Overview] for further explanation.
+- `initial.screen.method`: Specifies the statistical criterion for initial feature selection. Valid options are 'p-value' and 'FDR'.
 
 # Example
 
@@ -91,9 +89,10 @@ outliers[495:500, 45:50];
 An analysis in **OutSeekR** is run using the function `detect.outliers()`. With default settings, it can be run by simply passing the input data set via the `data` parameter. Other parameters include the following:
 
 - `num.null`: the number of transcripts to generate when simulating from null distributions; default is one million.
+- `initial.screen.method`: the statistical criterion for initial feature selection.
 - `p.value.threshold`: the p-value threshold for the outlier test; default is 0.05.
 - `fdr.threshold`: the false discovery rate (FDR)-adjusted p-value threshold for determining the final count of outliers; default is 0.01.
-- `kmeans.nstart` the number of random starts when computing k-means fraction; default is 1. See `?stats::kmeans` for further details.
+- `kmeans.nstart`: the number of random starts when computing k-means fraction; default is 1. See `?stats::kmeans` for further details.
 
 In our first example, we pass the `outliers` data frame and use the defaults for most other parameters. To keep runtime manageable, we limit the number of null transcripts generated to 1,000. Prior to running `detect.outliers()`, we set up parallel processing. See [Parallelization in **OutSeekR**] for further details.
 
@@ -115,27 +114,25 @@ str(outlier.test.run.1, max.level = 2);
 future::plan(future::sequential);
 ```
 
-Unadjusted p-values for the outlier test on each sample in each transcript are contained in the `p.values` entry of the object returned by `detect.outliers()`; FDR-adjusted p-values are contained in the `fdr` entry. Both are matrices with the same number of rows and columns as the input data, and they retain the same row and column names.
+Unadjusted p-values for the outlier test on each transcript are contained in the `p.values` entry of the object returned by `detect.outliers()`; FDR-adjusted p-values are contained in the `fdr` entry. 
 
 ```{r examine-p-values}
-outlier.test.run.1$p.values[1:6, 8:14];
-outlier.test.run.1$fdr[1:6, 8:14];
+outlier.test.run.1$p.values;
+outlier.test.run.1$fdr;
 ```
 
-Most of the elements of `p.values` and `fdr` will be `NA`. As explained in [Overview], testing for outliers for a given transcript stops after the first p-value is found that exceeds `p.value.threshold`. Because testing works from the most to least outlying sample, each p-value is guaranteed to be larger than the previous one. Thus, we can be sure that the missing p-values would also exceed our threshold. To ensure that the outlier test is run on each sample in each transcript, we could set the parameter `p.value.threshold` to `1`. However, this would dramatically increase the runtime of `detect.outliers()` and may not be practical in most cases.
+As explained in [Overview], testing for outliers for a given transcript stops after the p-values or FDRs from each rouns is found that exceeds the specified threshold. 
 
-The entries `num.outliers.unadjusted` and `num.outliers.adjusted` give transcript-specific counts of the number of outliers before and after FDR adjustment of the outlier test p-values. For `num.outliers.unadjusted`, this corresponds to the number of p-values below `p.value.threshold`; for `num.outliers.adjusted`, this corresponds to the number of FDR-adjusted p-values below `fdr.threshold`. (Note that `fdr.threshold` only impacts the reported count of outliers; it has no effect on the FDR adjustment itself.)
+The entries `num.outliers` give transcript-specific counts of the number of outliers based on the threshold of specified `initial.screen.method`.
 
 ```{r transcript-level-outlier-counts}
-head(outlier.test.run.1$num.outliers.unadjusted);
-head(outlier.test.run.1$num.outliers.adjusted);
+head(outlier.test.run.1$num.outliers);
 ```
 
 We can get a quick view of the distribution of the number of outliers across transcripts using `table()`:
 
 ```{r table}
-table(outlier.test.run.1$num.outliers.unadjusted);
-table(outlier.test.run.1$num.outliers.adjusted);
+table(outlier.test.run.1$num.outliers);
 ```
 
 More granular results can be found in the `outlier.test.results.list` entry of the object returned by `detect.outliers()`. It is a named list of data frames, where each reflects the results of a different 'round' of outlier testing; by 'round', we mean the process of excluding the most outlying sample (for all rounds except the first), calculating the five outlier statistics, ranking them alongside the statistics of the null data, computing the rank product, and computing the unadjusted p-value. Each data frame in `outlier.test.results.list` contains the transcript and sample identifiers, the five statistics calculated on the observed transcript, the rank product, and the unadjusted and FDR-adjusted p-value for the outlier test.
@@ -143,8 +140,6 @@ More granular results can be found in the `outlier.test.results.list` entry of t
 ```{r view-outlier-test-results-list}
 str(outlier.test.run.1$outlier.test.results.list);
 ```
-
-Notice that the number of rows in each data frame decreases. This again reflects the fact that for a given transcript, testing for outliers stops once a sample has been found not to be an outlier. A transcript will appear in as many rounds as it has outliers (plus one).
 
 It may be of use to combine the results across all rounds of outlier testing into a single data frame. One way to do this (while retaining the round information) using `lapply()` and `rbind()` is shown below:
 
@@ -190,6 +185,7 @@ future::plan(future::multisession);
 outlier.test.run.2 <- detect.outliers(
     data = outliers,
     num.null = 1e3,
+    initial.screen.method = 'fdr',
     p.value.threshold = 0.25,
     fdr.threshold = 0.05
     );
@@ -200,10 +196,9 @@ future::plan(future::sequential);
 str(outlier.test.run.2, max.level = 2);
 
 # Examine p-value and FDR matrices.
-outlier.test.run.2$p.values[1:6, 8:14];
-outlier.test.run.2$fdr[1:6, 8:14];
+outlier.test.run.2$p.values;
+outlier.test.run.2$fdr;
 
 # Check the distribution of number of outliers detected.
-table(outlier.test.run.2$num.outliers.unadjusted);
-table(outlier.test.run.2$num.outliers.adjusted);
+table(outlier.test.run.2$num.outliers);
 ```
