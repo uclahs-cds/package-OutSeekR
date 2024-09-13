@@ -32,7 +32,7 @@ A list consisting of the following entries:
 \item \code{p.values}: a matrix of unadjusted p-values for the outlier test run on each transcript in \code{data}.
 \item \code{fdr}: a matrix of FDR-adjusted p-values for the outlier test run on each transcript in \code{data}.
 \item \code{num.outliers}: a vector giving the number of outliers detected for each transcript based on the threshold. 
-\item \code{outlier.test.results.list}: a list of length \code{max(num.outliers.unadjusted) + 1} containing entries \code{roundN}, where \code{N} is between one and \code{max(num.outliers.unadjusted) + 1}.  \code{roundN} is the data frame of results for the outlier test after excluding the (N-1)th outlier sample, with \code{round1} being for the original data set (i.e., before excluding any outlier samples).
+\item \code{outlier.test.results.list}: a list of length \code{max(num.outliers) + 1} containing entries \code{roundN}, where \code{N} is between one and \code{max(num.outliers) + 1}.  \code{roundN} is the data frame of results for the outlier test after excluding the (N-1)th outlier sample, with \code{round1} being for the original data set (i.e., before excluding any outlier samples).
 \item \code{distributions}: a numeric vector indicating the optimal distribution for each transcript.  Possible values are 1 (normal), 2 (log-normal), 3 (exponential), and 4 (gamma).
 }
 }
