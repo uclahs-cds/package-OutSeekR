@@ -36,7 +36,6 @@ calculate.residuals <- function(x, distribution) {
     # trimmed data will be used to calculate the parameters of the
     # distribution, while the untrimmed data will be used to generate
     # residuals.
-    browser();
     x.nozero <- x + add.minimum.value;
     x.trim <- trim.sample(
         x = x,
