@@ -142,7 +142,7 @@ detect.outliers <- function(
             }
         );
     data.cosine.similarity <- future.apply::future_sapply(
-        X = obs.data, 
+        X = obs.data,
         FUN = function(x) {
             x$cosine.similarity
             }
@@ -213,7 +213,7 @@ detect.outliers <- function(
         future.seed = TRUE
         );
     null.zrange.mean <- future.apply::future_sapply(
-        X = null.data, 
+        X = null.data,
         FUN = function(x) {
             x$zrange.mean
             }
