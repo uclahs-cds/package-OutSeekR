@@ -10,7 +10,7 @@
 #' * 4 = gamma.
 #'
 #' @return A numeric vector of the same length as `x`.  Names are not retained.
-#'
+#' @export
 #' @examples
 #' # Generate fake data.
 #' set.seed(1234);
@@ -29,7 +29,6 @@
 #'     distribution = 4
 #'     );
 #'
-#' @noRd
 calculate.residuals <- function(x, distribution) {
     add.minimum.value <- least.significant.digit(x);
     # Add a minimum value to ensure the values in `x` are strictly
@@ -37,6 +36,7 @@ calculate.residuals <- function(x, distribution) {
     # trimmed data will be used to calculate the parameters of the
     # distribution, while the untrimmed data will be used to generate
     # residuals.
+    browser();
     x.nozero <- x + add.minimum.value;
     x.trim <- trim.sample(
         x = x,
