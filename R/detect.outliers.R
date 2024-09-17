@@ -79,7 +79,7 @@ detect.outliers <- function(
             x <- as.numeric(data[i, ]);
             zrange.mean <- zrange(
                 quantify.outliers(
-                    x, 
+                    x,
                     method = 'mean'
                     )
                 );
@@ -91,15 +91,15 @@ detect.outliers <- function(
                 );
             zrange.trimmean <- zrange(
                 quantify.outliers(
-                    x, 
-                    method = 'mean', 
+                    x,
+                    method = 'mean',
                     trim = 0.05
                     )
                 );
             fraction.kmeans <- kmeans.fraction(
                 quantify.outliers(
-                    x, 
-                    method = 'kmeans', 
+                    x,
+                    method = 'kmeans',
                     nstart = kmeans.nstart
                     )
                 );
@@ -107,7 +107,6 @@ detect.outliers <- function(
                 x = x,
                 distribution = optimal.distribution.data[i]
                 );
-            
             list(
                 zrange.mean = zrange.mean,
                 zrange.median = zrange.median,
@@ -116,28 +115,28 @@ detect.outliers <- function(
                 cosine.similarity = cosine.similarity
                 );
             },
-        future.seed = TRUE 
+        future.seed = TRUE
         );
     data.zrange.mean <- future.apply::future_sapply(
-        X = obs.data, 
+        X = obs.data,
         FUN = function(x) {
             x$zrange.mean
             }
         );
     data.zrange.median <- future.apply::future_sapply(
-        X = obs.data, 
+        X = obs.data,
         FUN = function(x) {
             x$zrange.median
             }
         );
     data.zrange.trimmean <- future.apply::future_sapply(
-        X = obs.data, 
+        X = obs.data,
         FUN = function(x) {
             x$zrange.trimmean
             }
         );
     data.fraction.kmeans <- future.apply::future_sapply(
-        X = obs.data, 
+        X = obs.data,
         FUN = function(x) {
             x$fraction.kmeans
             }
@@ -175,27 +174,27 @@ detect.outliers <- function(
             optimal.distribution.null.data <- identify.bic.optimal.data.distribution(null.row);
             zrange.mean <- zrange(
                 quantify.outliers(
-                    null.row, 
+                    null.row,
                     method = 'mean'
                     )
                 );
             zrange.median <- zrange(
                 quantify.outliers(
-                    null.row, 
+                    null.row,
                     method = 'median'
                     )
                 );
             zrange.trimmean <- zrange(
                 quantify.outliers(
-                    null.row, 
-                    method = 'mean', 
+                    null.row,
+                    method = 'mean',
                     trim = 0.05
                     )
                 );
             fraction.kmeans <- kmeans.fraction(
                 quantify.outliers(
-                    null.row, 
-                    method = 'kmeans', 
+                    null.row,
+                    method = 'kmeans',
                     nstart = kmeans.nstart
                     )
                 );
@@ -203,7 +202,6 @@ detect.outliers <- function(
                 x = as.numeric(null.row),
                 distribution = optimal.distribution.null.data
                 );
-            
             list(
                 zrange.mean = zrange.mean,
                 zrange.median = zrange.median,
@@ -221,25 +219,25 @@ detect.outliers <- function(
             }
         );
     null.zrange.median <- future.apply::future_sapply(
-        X = null.data, 
+        X = null.data,
         FUN = function(x) {
             x$zrange.median
             }
         );
     null.zrange.trimmean <- future.apply::future_sapply(
-        X = null.data, 
+        X = null.data,
         FUN = function(x) {
             x$zrange.trimmean
             }
         );
     null.fraction.kmeans <- future.apply::future_sapply(
-        X = null.data, 
+        X = null.data,
         FUN = function(x) {
             x$fraction.kmeans
             }
         );
     null.cosine.similarity <- future.apply::future_sapply(
-        X = null.data, 
+        X = null.data,
         FUN = function(x) {
             x$cosine.similarity
             }
