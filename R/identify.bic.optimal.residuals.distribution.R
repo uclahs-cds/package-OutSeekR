@@ -8,7 +8,7 @@
 #' * 2 = log-normal,
 #' * 3 = exponential, and
 #' * 4 = gamma.
-#'
+#' @export identify.bic.optimal.residuals.distribution
 #' @examples
 #' # Generate fake data.
 #' set.seed(1234);
@@ -20,8 +20,6 @@
 #' identify.bic.optimal.residuals.distribution(
 #'     x = x
 #'     );
-#'
-#' @noRd
 identify.bic.optimal.residuals.distribution <- function(x) {
     # Add a minimum value to ensure the values in `x` are strictly
     # positive.

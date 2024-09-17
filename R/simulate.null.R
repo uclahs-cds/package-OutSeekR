@@ -12,7 +12,7 @@
 #' @param r.distribution A numeric code corresponding to the optimal distribution of `x` as returned by `identify.bic.optimal.residuals.distribution()`.  Possible values are the same as those for `x.distribution`.
 #'
 #' @return A numeric vector of the same length as `x`.  Names are not retained.
-#'
+#' @export simulate.null
 #' @examples
 #' # Prepare fake data.
 #' set.seed(1234);
@@ -41,8 +41,6 @@
 #'     r = r.trimmed,
 #'     r.distribution = r.dist
 #'     );
-#'
-#' @noRd
 simulate.null <- function(
     x,
     x.distribution,
