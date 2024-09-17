@@ -259,6 +259,25 @@ detect.outliers <- function(
     # `calculate.p.values()` for a transcript in the observed data.
     # See the documentation for `calculate.p.values()` for a
     # description of its return value.
+    
+    # ### save example data for testing calcualte.p.values
+    # browser();
+    # example.data.for.calculate.p.values <- list(
+    #     data = data,
+    #     x.distribution = optimal.distribution.data,
+    #     x.zrange.mean = data.zrange.mean,
+    #     x.zrange.median = data.zrange.median,
+    #     x.zrange.trimmean = data.zrange.trimmean,
+    #     x.fraction.kmeans = data.fraction.kmeans,
+    #     x.cosine.similarity = data.cosine.similarity,
+    #     null.zrange.mean = null.zrange.mean,
+    #     null.zrange.median = null.zrange.median,
+    #     null.zrange.trimmean = null.zrange.trimmean,
+    #     null.fraction.kmeans = null.fraction.kmeans,
+    #     null.cosine.similarity = null.cosine.similarity,
+    #     kmeans.nstart = kmeans.nstart
+    #     );
+    # usethis::use_data(example.data.for.calculate.p.values);
     outlier.test.results <- future.apply::future_lapply(
         X = seq_len(nrow(data)),
         FUN = function(i) {
