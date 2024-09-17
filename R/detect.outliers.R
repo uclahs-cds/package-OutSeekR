@@ -73,65 +73,86 @@ detect.outliers <- function(
     # mean / trimmed standard deviation, (3) z-scores based on the
     # median / median absolute deviation, and (4) the cluster
     # assignment from k-means with two clusters.
-    data.zrange.mean <- future.apply::future_apply(
-        X = data,
-        MARGIN = 1,
-        FUN = quantify.outliers,
-        method = 'mean'
-        );
-    data.zrange.median <- future.apply::future_apply(
-        X = data,
-        MARGIN = 1,
-        FUN = quantify.outliers,
-        method = 'median'
-        );
-    data.zrange.trimmean <- future.apply::future_apply(
-        X = data,
-        MARGIN = 1,
-        FUN = quantify.outliers,
-        method = 'mean',
-        trim = 0.05
-        );
-    data.fraction.kmeans <- future.apply::future_apply(
-        X = data,
-        MARGIN = 1,
-        FUN = quantify.outliers,
-        method = 'kmeans',
-        nstart = kmeans.nstart,
-        future.seed = TRUE
-        );
-    # Compute the ranges of the z-score statistics.
-    data.zrange.mean <- future.apply::future_apply(
-        X = data.zrange.mean,
-        MARGIN = 2,
-        FUN = zrange
-        );
-    data.zrange.median <- future.apply::future_apply(
-        X = data.zrange.median,
-        MARGIN = 2,
-        FUN = zrange
-        );
-    data.zrange.trimmean <- future.apply::future_apply(
-        X = data.zrange.trimmean,
-        MARGIN = 2,
-        FUN = zrange
-        );
-    # Compute the k-means fraction.
-    data.fraction.kmeans <- future.apply::future_apply(
-        X = data.fraction.kmeans,
-        MARGIN = 2,
-        FUN = kmeans.fraction
-        );
-    # Compute the cosine similarity.
-    data.cosine.similarity <- future.apply::future_sapply(
+    obs.data <- future.apply::future_lapply(
         X = seq_len(nrow(data)),
         FUN = function(i) {
-            outlier.detection.cosine(
-                x = as.numeric(data[i, ]),
+            x <- as.numeric(data[i, ]);
+            zrange.mean <- zrange(
+                quantify.outliers(
+                    x, 
+                    method = 'mean'
+                    )
+                );
+            zrange.median <- zrange(
+                quantify.outliers(
+                    x,
+                    method = 'median'
+                    )
+                );
+            zrange.trimmean <- zrange(
+                quantify.outliers(
+                    x, 
+                    method = 'mean', 
+                    trim = 0.05
+                    )
+                );
+            fraction.kmeans <- kmeans.fraction(
+                quantify.outliers(
+                    x, 
+                    method = 'kmeans', 
+                    nstart = kmeans.nstart
+                    )
+                );
+            cosine.similarity <- outlier.detection.cosine(
+                x = x,
                 distribution = optimal.distribution.data[i]
                 );
+            
+            list(
+                zrange.mean = zrange.mean,
+                zrange.median = zrange.median,
+                zrange.trimmean = zrange.trimmean,
+                fraction.kmeans = fraction.kmeans,
+                cosine.similarity = cosine.similarity
+                );
+            },
+        future.seed = TRUE 
+        );
+    data.zrange.mean <- future.apply::future_sapply(
+        X = obs.data, 
+        FUN = function(x) {
+            x$zrange.mean
             }
         );
+    data.zrange.median <- future.apply::future_sapply(
+        X = obs.data, 
+        FUN = function(x) {
+            x$zrange.median
+            }
+        );
+    data.zrange.trimmean <- future.apply::future_sapply(
+        X = obs.data, 
+        FUN = function(x) {
+            x$zrange.trimmean
+            }
+        );
+    data.fraction.kmeans <- future.apply::future_sapply(
+        X = obs.data, 
+        FUN = function(x) {
+            x$fraction.kmeans
+            }
+        );
+    data.cosine.similarity <- future.apply::future_sapply(
+        X = obs.data, 
+        FUN = function(x) {
+            x$cosine.similarity
+            }
+        );
+    names(data.zrange.mean) <- rownames(data);
+    names(data.zrange.median) <- rownames(data);
+    names(data.zrange.trimmean) <- rownames(data);
+    names(data.fraction.kmeans) <- rownames(data);
+    names(data.cosine.similarity) <- rownames(data);
     # Generate a matrix of null transcripts by simulating from their
     # respective optimal distributions.
     sampled.indices <- sample(
@@ -142,88 +163,92 @@ detect.outliers <- function(
     null.data <- future.apply::future_lapply(
         X = sampled.indices,
         FUN = function(i) {
-            simulate.null(
+            null.row <- simulate.null(
                 x = as.numeric(data[i, ]),
                 x.distribution = optimal.distribution.data[i],
                 r = as.numeric(observed.residuals[i, ]),
                 r.distribution = optimal.distribution.residuals[i]
                 );
+            # Determine which of the normal, log-normal, exponential, or gamma
+            # distributions provides the best fit to each row of values in
+            # `null.data`.
+            optimal.distribution.null.data <- identify.bic.optimal.data.distribution(null.row);
+            zrange.mean <- zrange(
+                quantify.outliers(
+                    null.row, 
+                    method = 'mean'
+                    )
+                );
+            zrange.median <- zrange(
+                quantify.outliers(
+                    null.row, 
+                    method = 'median'
+                    )
+                );
+            zrange.trimmean <- zrange(
+                quantify.outliers(
+                    null.row, 
+                    method = 'mean', 
+                    trim = 0.05
+                    )
+                );
+            fraction.kmeans <- kmeans.fraction(
+                quantify.outliers(
+                    null.row, 
+                    method = 'kmeans', 
+                    nstart = kmeans.nstart
+                    )
+                );
+            cosine.similarity <- outlier.detection.cosine(
+                x = as.numeric(null.row),
+                distribution = optimal.distribution.null.data
+                );
+            
+            list(
+                zrange.mean = zrange.mean,
+                zrange.median = zrange.median,
+                zrange.trimmean = zrange.trimmean,
+                fraction.kmeans = fraction.kmeans,
+                cosine.similarity = cosine.similarity
+                );
             },
         future.seed = TRUE
         );
-    null.data <- do.call(
-        what = rbind,
-        args = null.data
-        );
-    rownames(null.data) <- rownames(data)[sampled.indices];
-    # Determine which of the normal, log-normal, exponential, or gamma
-    # distributions provides the best fit to each row of values in
-    # `null.data`.
-    optimal.distribution.null.data <- future.apply::future_apply(
-        X = null.data,
-        MARGIN = 1,
-        FUN = identify.bic.optimal.data.distribution,
-        future.seed = TRUE
-        );
-    null.zrange.mean <- future.apply::future_apply(
-        X = null.data,
-        MARGIN = 1,
-        FUN = quantify.outliers,
-        method = 'mean'
-        );
-    null.zrange.median <- future.apply::future_apply(
-        X = null.data,
-        MARGIN = 1,
-        FUN = quantify.outliers,
-        method = 'median'
-        );
-    null.zrange.trimmean <- future.apply::future_apply(
-        X = null.data,
-        MARGIN = 1,
-        FUN = quantify.outliers,
-        method = 'mean',
-        trim = 0.05
-        );
-    null.fraction.kmeans <- future.apply::future_apply(
-        X = null.data,
-        MARGIN = 1,
-        FUN = quantify.outliers,
-        method = 'kmeans',
-        nstart = kmeans.nstart,
-        future.seed = TRUE
-        );
-    # Compute the ranges of the z-score statistics.
-    null.zrange.mean <- future.apply::future_apply(
-        X = null.zrange.mean,
-        MARGIN = 2,
-        FUN = zrange
-        );
-    null.zrange.median <- future.apply::future_apply(
-        X = null.zrange.median,
-        MARGIN = 2,
-        FUN = zrange
-        );
-    null.zrange.trimmean <- future.apply::future_apply(
-        X = null.zrange.trimmean,
-        MARGIN = 2,
-        FUN = zrange
-        );
-    # Compute the k-means fraction.
-    null.fraction.kmeans <- future.apply::future_apply(
-        X = null.fraction.kmeans,
-        MARGIN = 2,
-        FUN = kmeans.fraction
-        );
-    # Compute the cosine similarity.
-    null.cosine.similarity <- future.apply::future_sapply(
-        X = seq_len(nrow(null.data)),
-        FUN = function(i) {
-            outlier.detection.cosine(
-                x = as.numeric(null.data[i, ]),
-                distribution = optimal.distribution.null.data[i]
-                );
+    null.zrange.mean <- future.apply::future_sapply(
+        X = null.data, 
+        FUN = function(x) {
+            x$zrange.mean
             }
         );
+    null.zrange.median <- future.apply::future_sapply(
+        X = null.data, 
+        FUN = function(x) {
+            x$zrange.median
+            }
+        );
+    null.zrange.trimmean <- future.apply::future_sapply(
+        X = null.data, 
+        FUN = function(x) {
+            x$zrange.trimmean
+            }
+        );
+    null.fraction.kmeans <- future.apply::future_sapply(
+        X = null.data, 
+        FUN = function(x) {
+            x$fraction.kmeans
+            }
+        );
+    null.cosine.similarity <- future.apply::future_sapply(
+        X = null.data, 
+        FUN = function(x) {
+            x$cosine.similarity
+            }
+        );
+    names(null.zrange.mean) <- rownames(data)[sampled.indices];
+    names(null.zrange.median) <- rownames(data)[sampled.indices];
+    names(null.zrange.trimmean) <- rownames(data)[sampled.indices];
+    names(null.fraction.kmeans) <- rownames(data)[sampled.indices];
+    names(null.cosine.similarity) <- rownames(data)[sampled.indices];
     # Calculate p-values.  The result is a list of length equal to
     # `nrow(data)`, with each sublist containing the results of
     # `calculate.p.values()` for a transcript in the observed data.
@@ -284,39 +309,32 @@ detect.outliers <- function(
                     most.abundant.sample <- names(x)[1];
                     # Compute quantities for outlier detection in the remaining
                     # samples of the observed transcript.
-                    x.zrange.mean <- quantify.outliers(
-                        x = x,
-                        method = 'mean'
-                        );
-                    x.zrange.median <- quantify.outliers(
-                        x = x,
-                        method = 'median'
-                        );
-                    x.zrange.trimmean <- quantify.outliers(
-                        x = x,
-                        method = 'mean',
-                        trim = 0.05
-                        );
-                    x.fraction.kmeans <- quantify.outliers(
-                        x = x,
-                        method = 'kmeans',
-                        nstart = kmeans.nstart
-                        );
-                    # Compute the ranges of the z-score statistics.
                     x.zrange.mean <- zrange(
-                        x = x.zrange.mean
+                        quantify.outliers(
+                            x = x,
+                            method = 'mean'
+                            )
                         );
                     x.zrange.median <- zrange(
-                        x = x.zrange.median
+                        quantify.outliers(
+                            x = x,
+                            method = 'median'
+                            )
                         );
                     x.zrange.trimmean <- zrange(
-                        x = x.zrange.trimmean
+                        quantify.outliers(
+                            x = x,
+                            method = 'mean',
+                            trim = 0.05
+                            )
                         );
-                    # Compute the k-means fraction.
                     x.fraction.kmeans <- kmeans.fraction(
-                        x = x.fraction.kmeans
+                        quantify.outliers(
+                            x = x,
+                            method = 'kmeans',
+                            nstart = kmeans.nstart
+                            )
                         );
-                    # Compute the cosine similarity.
                     x.cosine.similarity <- outlier.detection.cosine(
                         x = x,
                         distribution = optimal.distribution.data[i]
@@ -365,39 +383,32 @@ detect.outliers <- function(
                     most.abundant.sample <- names(x)[1];
                     # Compute quantities for outlier detection in the remaining
                     # samples of the observed transcript.
-                    x.zrange.mean <- quantify.outliers(
-                        x = x,
-                        method = 'mean'
-                        );
-                    x.zrange.median <- quantify.outliers(
-                        x = x,
-                        method = 'median'
-                        );
-                    x.zrange.trimmean <- quantify.outliers(
-                        x = x,
-                        method = 'mean',
-                        trim = 0.05
-                        );
-                    x.fraction.kmeans <- quantify.outliers(
-                        x = x,
-                        method = 'kmeans',
-                        nstart = kmeans.nstart
-                        );
-                    # Compute the ranges of the z-score statistics.
                     x.zrange.mean <- zrange(
-                        x = x.zrange.mean
+                        quantify.outliers(
+                            x = x,
+                            method = 'mean'
+                            )
                         );
                     x.zrange.median <- zrange(
-                        x = x.zrange.median
+                        quantify.outliers(
+                            x = x,
+                            method = 'median'
+                            )
                         );
                     x.zrange.trimmean <- zrange(
-                        x = x.zrange.trimmean
+                        quantify.outliers(
+                            x = x,
+                            method = 'mean',
+                            trim = 0.05
+                            )
                         );
-                    # Compute the k-means fraction.
                     x.fraction.kmeans <- kmeans.fraction(
-                        x = x.fraction.kmeans
+                        quantify.outliers(
+                            x = x,
+                            method = 'kmeans',
+                            nstart = kmeans.nstart
+                            )
                         );
-                    # Compute the cosine similarity.
                     x.cosine.similarity <- outlier.detection.cosine(
                         x = x,
                         distribution = optimal.distribution.data[i]
@@ -469,13 +480,6 @@ detect.outliers <- function(
             )
         );
     rownames(fdr) <- rownames(data);
-    # # Get counts of the number of outliers per transcript based on the
-    # # FDR-adjusted p-values.
-    # num.outliers.adjusted <- apply(
-    #     X = fdr,
-    #     MARGIN = 1,
-    #     FUN = function(x) sum(x < fdr.threshold, na.rm = TRUE)
-    # );
     # Calculate outliers based on the chosen method
     if (initial.screen.method == 'p.value') {
         num.outliers <- apply(
