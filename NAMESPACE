@@ -2,3 +2,4 @@
 
 export(detect.outliers)
 export(identify.bic.optimal.data.distribution)
+export(trim.sample)

@@ -7,14 +7,12 @@
 #' @param x A numeric vector.
 #' @param trim A number, the fraction of observations to be trimmed from each end of `x`.
 #' @return A sorted, trimmed copy of `x`.
-#'
+#' @export trim.sample
 #' @examples
 #' trim.sample(
 #'     x = 1:20,
 #'     trim = 0.05
 #'     );
-#'
-#' @noRd
 trim.sample <- function(x, trim = 0.05) {
     x <- sort(x);
     if (length(x) <= 10) {
