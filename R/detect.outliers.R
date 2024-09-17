@@ -15,8 +15,15 @@
 #' * `num.outliers`: a vector giving the number of outliers detected for each transcript based on the threshold.
 #' * `outlier.test.results.list`: a list of length `max(num.outliers) + 1` containing entries `roundN`, where `N` is between one and `max(num.outliers) + 1`.  `roundN` is the data frame of results for the outlier test after excluding the (N-1)th outlier sample, with `round1` being for the original data set (i.e., before excluding any outlier samples).
 #' * `distributions`: a numeric vector indicating the optimal distribution for each transcript.  Possible values are 1 (normal), 2 (log-normal), 3 (exponential), and 4 (gamma).
-#' * `initial.screen.method`: Specifies the statistical criterion for initial feature selection. Valid options are 'p-value' and 'FDR'.
+#' * `initial.screen.method`: Specifies the statistical criterion for initial feature selection. Valid options are 'p-value' and 'FDR' (p-value used by default).
 #' @export
+#' @examples
+#' data(outliers);
+#' outliers.subset <- outliers[1:10,];
+#' results <- detect.outliers(
+#'    data = outliers.subset,
+#'    num.null = 10
+#'    );
 detect.outliers <- function(
         data,
         num.null = 1e6,
