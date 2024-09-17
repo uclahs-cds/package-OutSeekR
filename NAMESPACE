@@ -3,4 +3,8 @@
 export(calculate.residuals)
 export(detect.outliers)
 export(identify.bic.optimal.data.distribution)
+export(kmeans.fraction)
+export(outlier.detection.cosine)
+export(quantify.outliers)
 export(trim.sample)
+export(zrange)

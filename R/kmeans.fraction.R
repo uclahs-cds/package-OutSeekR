@@ -6,22 +6,11 @@
 #'
 #' @param x A numeric vector.
 #' @return A number.
-#'
+#' @export
 #' @examples
 #' x <- c(1, 1, 2, 2, 2, 2, 2, 2, 2, 2);
 #' names(x) <- letters[1:length(x)];
-#' outlier.detection.kmeans(
-#'     x = x
-#'     );
-#'
-#' # If `quantify.outliers` was run with `exclude.zero = TRUE`, zero
-#' # values are ignored in the calculation of the k-means fraction.
-#' x <- c(0, 1, 2, 2, 2, 2, 2, 2, 2, 2);
-#' outlier.detection.kmeans(
-#'     x = x
-#'     );
-#'
-#' @noRd
+#' kmeans.fraction(x);
 kmeans.fraction <- function(x) {
     if (1 == length(unique(x))) {
         fraction <- NA;
