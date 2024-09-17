@@ -15,7 +15,7 @@
 #' * `num.outliers`: a vector giving the number of outliers detected for each transcript based on the threshold.
 #' * `outlier.test.results.list`: a list of length `max(num.outliers) + 1` containing entries `roundN`, where `N` is between one and `max(num.outliers) + 1`.  `roundN` is the data frame of results for the outlier test after excluding the (N-1)th outlier sample, with `round1` being for the original data set (i.e., before excluding any outlier samples).
 #' * `distributions`: a numeric vector indicating the optimal distribution for each transcript.  Possible values are 1 (normal), 2 (log-normal), 3 (exponential), and 4 (gamma).
-#'
+#' * `initial.screen.method`: Specifies the statistical criterion for initial feature selection. Valid options are 'p-value' and 'FDR'.
 #' @export
 detect.outliers <- function(
         data,
@@ -278,9 +278,9 @@ detect.outliers <- function(
                     names(x) <- colnames(data);
                     # Sort x in decreasing order
                     sorted.indices <- order(x, decreasing = TRUE);
-                    # Remove the top j-1 values (j-1 because we're keeping the j-th value and below)
+                    # Remove the top k-1 values (k-1 because we're keeping the k-th value and below)
                     x <- x[sorted.indices[k:length(x)]];
-                    # The most abundant sample in this round is the j-th highest overall
+                    # The most abundant sample in this round is the k-th highest overall
                     most.abundant.sample <- names(x)[1];
                     # Compute quantities for outlier detection in the remaining
                     # samples of the observed transcript.
@@ -359,9 +359,9 @@ detect.outliers <- function(
                     names(x) <- colnames(data);
                     # Sort x in decreasing order
                     sorted.indices <- order(x, decreasing = TRUE);
-                    # Remove the top j-1 values (j-1 because we're keeping the j-th value and below)
+                    # Remove the top k-1 values (k-1 because we're keeping the k-th value and below)
                     x <- x[sorted.indices[k:length(x)]];
-                    # The most abundant sample in this round is the j-th highest overall
+                    # The most abundant sample in this round is the k-th highest overall
                     most.abundant.sample <- names(x)[1];
                     # Compute quantities for outlier detection in the remaining
                     # samples of the observed transcript.
