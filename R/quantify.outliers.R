@@ -13,7 +13,7 @@
 #' @param exclude.zero A logical, whether zeros should be excluded (`TRUE`) or not excluded (`FALSE`, the default) from computations.  For `method = 'mean'` and `method = 'median'`, this means zeros will not be included in computing the summary statistics; for `method = 'kmeans'`, this means zeros will be placed in their own cluster, coded `0`.
 #'
 #' @return A numeric vector the same size as `x` whose values are the requested quantities computed on the corresponding elements of `x`.
-#'
+#' @export
 #' @examples
 #' # Generate fake data.
 #' set.seed(1234);
@@ -73,8 +73,6 @@
 #'     method = 'kmeans',
 #'     exclude.zero = TRUE
 #'     );
-#'
-#' @noRd
 quantify.outliers <- function(x, method = 'mean', trim = 0, nstart = 1, exclude.zero = FALSE) {
     x.na <- stats::na.omit(x);
     if ('median' == method) {
@@ -193,7 +191,7 @@ quantify.outliers <- function(x, method = 'mean', trim = 0, nstart = 1, exclude.
 #' @param distribution A numeric code corresponding to the optimal distribution of `x` as returned by `identify.bic.optimal.data.distribution()`.
 #'
 #' @return A number.
-#'
+#' @export
 #' @examples
 #' # Generate fake data.
 #' set.seed(1234);
@@ -206,8 +204,6 @@ quantify.outliers <- function(x, method = 'mean', trim = 0, nstart = 1, exclude.
 #'     x = x,
 #'     distribution = 4
 #'     );
-#'
-#' @noRd
 outlier.detection.cosine <- function(x, distribution) {
     # Define a minimum value to ensure the values in `x` are strictly
     # positive.
