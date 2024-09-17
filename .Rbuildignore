@@ -6,3 +6,5 @@
 metadata.yaml
 .cicd-env
 ^data-raw$
+^doc$
+^Meta$
