@@ -2,6 +2,8 @@
 
 The **OutSeekR** package implements a statistical approach to detecting outliers in RNA-seq and related data.
 
+To get started, see `?detect.outliers` for a quick example.  For a more detailed introduction, see the vignette `vignette('introduction', package = 'OutSeekR')`.
+
 ## License
 
 Author: Jee Yun Han(jyhan@mednet.ucla.edu), John M Sahrmann(jsahrmann@mednet.ucla.edu)

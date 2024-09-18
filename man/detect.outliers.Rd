@@ -7,7 +7,7 @@
 detect.outliers(
   data,
   num.null = 1e+06,
-  initial.screen.method = c('p.value', 'fdr'),
+  initial.screen.method = c("p.value", "fdr"),
   p.value.threshold = 0.05,
   fdr.threshold = 0.01,
   kmeans.nstart = 1
@@ -31,11 +31,20 @@ A list consisting of the following entries:
 \itemize{
 \item \code{p.values}: a matrix of unadjusted p-values for the outlier test run on each transcript in \code{data}.
 \item \code{fdr}: a matrix of FDR-adjusted p-values for the outlier test run on each transcript in \code{data}.
-\item \code{num.outliers}: a vector giving the number of outliers detected for each transcript based on the threshold. 
+\item \code{num.outliers}: a vector giving the number of outliers detected for each transcript based on the threshold.
 \item \code{outlier.test.results.list}: a list of length \code{max(num.outliers) + 1} containing entries \code{roundN}, where \code{N} is between one and \code{max(num.outliers) + 1}.  \code{roundN} is the data frame of results for the outlier test after excluding the (N-1)th outlier sample, with \code{round1} being for the original data set (i.e., before excluding any outlier samples).
 \item \code{distributions}: a numeric vector indicating the optimal distribution for each transcript.  Possible values are 1 (normal), 2 (log-normal), 3 (exponential), and 4 (gamma).
+\item \code{initial.screen.method}: Specifies the statistical criterion for initial feature selection. Valid options are 'p-value' and 'FDR' (p-value used by default).
 }
 }
 \description{
 Detect outliers in normalized RNA-seq data.
+}
+\examples{
+data(outliers);
+outliers.subset <- outliers[1:10,];
+results <- detect.outliers(
+   data = outliers.subset,
+   num.null = 10
+   );
 }

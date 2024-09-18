@@ -15,8 +15,15 @@
 #' * `num.outliers`: a vector giving the number of outliers detected for each transcript based on the threshold.
 #' * `outlier.test.results.list`: a list of length `max(num.outliers) + 1` containing entries `roundN`, where `N` is between one and `max(num.outliers) + 1`.  `roundN` is the data frame of results for the outlier test after excluding the (N-1)th outlier sample, with `round1` being for the original data set (i.e., before excluding any outlier samples).
 #' * `distributions`: a numeric vector indicating the optimal distribution for each transcript.  Possible values are 1 (normal), 2 (log-normal), 3 (exponential), and 4 (gamma).
-#' * `initial.screen.method`: Specifies the statistical criterion for initial feature selection. Valid options are 'p-value' and 'FDR'.
+#' * `initial.screen.method`: Specifies the statistical criterion for initial feature selection. Valid options are 'p-value' and 'FDR' (p-value used by default).
 #' @export
+#' @examples
+#' data(outliers);
+#' outliers.subset <- outliers[1:10,];
+#' results <- detect.outliers(
+#'    data = outliers.subset,
+#'    num.null = 10
+#'    );
 detect.outliers <- function(
         data,
         num.null = 1e6,
@@ -252,6 +259,25 @@ detect.outliers <- function(
     # `calculate.p.values()` for a transcript in the observed data.
     # See the documentation for `calculate.p.values()` for a
     # description of its return value.
+    
+    # ### save example data for testing calcualte.p.values
+    # browser();
+    # example.data.for.calculate.p.values <- list(
+    #     data = data,
+    #     x.distribution = optimal.distribution.data,
+    #     x.zrange.mean = data.zrange.mean,
+    #     x.zrange.median = data.zrange.median,
+    #     x.zrange.trimmean = data.zrange.trimmean,
+    #     x.fraction.kmeans = data.fraction.kmeans,
+    #     x.cosine.similarity = data.cosine.similarity,
+    #     null.zrange.mean = null.zrange.mean,
+    #     null.zrange.median = null.zrange.median,
+    #     null.zrange.trimmean = null.zrange.trimmean,
+    #     null.fraction.kmeans = null.fraction.kmeans,
+    #     null.cosine.similarity = null.cosine.similarity,
+    #     kmeans.nstart = kmeans.nstart
+    #     );
+    # usethis::use_data(example.data.for.calculate.p.values);
     outlier.test.results <- future.apply::future_lapply(
         X = seq_len(nrow(data)),
         FUN = function(i) {

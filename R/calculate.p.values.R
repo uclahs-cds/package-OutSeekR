@@ -15,12 +15,28 @@
 #' @param null.fraction.kmeans A numeric vector, the k-means fraction of each transcript in the null data.
 #' @param null.cosine.similarity A numeric vector, the cosine similarity of each transcript in the null data.
 #' @param kmeans.nstart The number of random starts when computing k-means fraction; default is 1.  See `?stats::kmeans` for further details.
-#'
+#' @export
 #' @return A list consisting of the following entries:
 #' * `p.values`: a vector of p-values for the outlier test run on each sample (up until the p-value exceeds `p.value.threshold`); and
 #' * `outlier.statistics.list`, a list of vectors containing the values of the outlier statistics calculated from the remaining samples.  The list will be of length equal to one plus the total number of outliers (i.e., the number of samples with an outlier test p-value less than `p.value.threshold`) and will contain entries `outlier.statistics.N`, where `N` is between zero and the total number of outliers.  `outlier.statistics.N` is the vector of outlier statistics after excluding the `N`th outlier sample, with `outlier.statistics.0` being for the complete transcript.
-#'
-#' @noRd
+#' @examples
+#' data(example.data.for.calculate.p.values);
+#'i <- 1; # row index of transcript to test
+#'calculate.p.values(
+#'    x = example.data.for.calculate.p.values$data[i,],
+#'    x.distribution = example.data.for.calculate.p.values$x.distribution[i],
+#'    x.zrange.mean = example.data.for.calculate.p.values$x.zrange.mean[i],
+#'    x.zrange.median = example.data.for.calculate.p.values$x.zrange.median[i],
+#'    x.zrange.trimmean = example.data.for.calculate.p.values$x.zrange.trimmean[i],
+#'    x.fraction.kmeans = example.data.for.calculate.p.values$x.fraction.kmeans[i],
+#'    x.cosine.similarity = example.data.for.calculate.p.values$x.cosine.similarity[i],
+#'    null.zrange.mean = example.data.for.calculate.p.values$null.zrange.mean,
+#'    null.zrange.median = example.data.for.calculate.p.values$null.zrange.median,
+#'    null.zrange.trimmean = example.data.for.calculate.p.values$null.zrange.trimmean,
+#'    null.fraction.kmeans = example.data.for.calculate.p.values$null.fraction.kmeans,
+#'    null.cosine.similarity = example.data.for.calculate.p.values$null.cosine.similarity,
+#'    kmeans.nstart = example.data.for.calculate.p.values$kmeans.nstart
+#'    );
 calculate.p.values <- function(
     x,
     x.distribution,

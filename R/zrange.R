@@ -4,7 +4,7 @@
 #'
 #' @param x A numeric vector
 #' @return A number.
-#'
+#' @export
 #' @examples
 #' set.seed(1234);
 #' x <- rnorm(
@@ -13,8 +13,6 @@
 #' zrange(
 #'     x = x
 #'     );
-#'
-#' @noRd
 zrange <- function(x) {
     if (all(is.na(x))) {
         return(NA);
