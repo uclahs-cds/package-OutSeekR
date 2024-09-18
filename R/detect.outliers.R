@@ -259,7 +259,6 @@ detect.outliers <- function(
     # `calculate.p.values()` for a transcript in the observed data.
     # See the documentation for `calculate.p.values()` for a
     # description of its return value.
-    
     # ### save example data for testing calcualte.p.values
     # browser();
     # example.data.for.calculate.p.values <- list(
