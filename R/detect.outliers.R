@@ -32,6 +32,10 @@ detect.outliers <- function(
         fdr.threshold = 0.01,
         kmeans.nstart = 1
     ) {
+    stopifnot(
+        'Missing values are not allowed in the input dataset.
+        Please considering removing or imputing missing values first.' = 0 == sum(is.na(data))
+        );
     # Match the initial screening method
     initial.screen.method <- match.arg(initial.screen.method);
 
