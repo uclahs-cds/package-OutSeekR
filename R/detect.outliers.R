@@ -293,155 +293,121 @@ detect.outliers <- function(
         p = outlier.test.results.list[[next.name]]$p.value,
         method = 'fdr'
         );
-
+    # This code implements an iterative outlier detection algorithm
+    # It processes data in rounds, removing extreme values each iteration, 
+    # until no more outliers are detected based on either p-value or FDR thresholds.
+    perform.outlier.detection <- function(
+        k,
+        data,
+        optimal.distribution.data,
+        null.zrange.mean,
+        null.zrange.median,
+        null.zrange.trimmean,    
+        null.fraction.kmeans,
+        null.cosine.similarity,
+        kmeans.nstart
+        ) {
+        outlier.test.results.iter <- future.apply::future_lapply(
+            X = seq_len(nrow(data)),
+            FUN = function(i) {
+                x <- as.numeric(data[i, ]);
+                names(x) <- colnames(data);
+                sorted.indices <- order(x, decreasing = TRUE);
+                x <- x[sorted.indices[k:length(x)]];
+                most.abundant.sample <- names(x)[1];
+                
+                x.zrange.mean <- zrange(
+                    quantify.outliers(
+                        x = x,
+                        method = 'mean'
+                        )
+                    );
+                x.zrange.median <- zrange(
+                    quantify.outliers(
+                        x = x,
+                        method = 'median'
+                        )
+                    );
+                x.zrange.trimmean <- zrange(
+                    quantify.outliers(
+                        x = x,
+                        method = 'mean',
+                        trim = 0.05
+                        )
+                    );
+                x.fraction.kmeans <- kmeans.fraction(
+                    quantify.outliers(
+                        x = x,
+                        method = 'kmeans',
+                        nstart = kmeans.nstart
+                        )
+                    );
+                x.cosine.similarity <- outlier.detection.cosine(
+                    x = x,
+                    distribution = optimal.distribution.data[i]
+                    );
+                calculate.p.values(
+                    x = x,
+                    x.distribution = optimal.distribution.data[i],
+                    x.zrange.mean = x.zrange.mean,
+                    x.zrange.median = x.zrange.median,
+                    x.zrange.trimmean = x.zrange.trimmean,
+                    x.fraction.kmeans = x.fraction.kmeans,
+                    x.cosine.similarity = x.cosine.similarity,
+                    null.zrange.mean = null.zrange.mean,
+                    null.zrange.median = null.zrange.median,
+                    null.zrange.trimmean = null.zrange.trimmean,
+                    null.fraction.kmeans = null.fraction.kmeans,
+                    null.cosine.similarity = null.cosine.similarity,
+                    kmeans.nstart = kmeans.nstart
+                    );
+                },
+            future.seed = TRUE
+            );
+        do.call(rbind, outlier.test.results.iter);
+        };
     if (initial.screen.method == 'p.value') {
         while (sum(stats::na.omit(outlier.test.results.list[[next.name]]$p.value) < p.value.threshold) > 0) {
             k <- k + 1;
             next.name <- paste0('round', k);
-            outlier.test.results.iter <- future.apply::future_lapply(
-                X = seq_len(nrow(data)),
-                FUN = function(i) {
-                    x <- as.numeric(data[i, ]);
-                    names(x) <- colnames(data);
-                    # Sort x in decreasing order
-                    sorted.indices <- order(x, decreasing = TRUE);
-                    # Remove the top k-1 values (k-1 because we're keeping the k-th value and below)
-                    x <- x[sorted.indices[k:length(x)]];
-                    # The most abundant sample in this round is the k-th highest overall
-                    most.abundant.sample <- names(x)[1];
-                    # Compute quantities for outlier detection in the remaining
-                    # samples of the observed transcript.
-                    x.zrange.mean <- zrange(
-                        quantify.outliers(
-                            x = x,
-                            method = 'mean'
-                            )
-                        );
-                    x.zrange.median <- zrange(
-                        quantify.outliers(
-                            x = x,
-                            method = 'median'
-                            )
-                        );
-                    x.zrange.trimmean <- zrange(
-                        quantify.outliers(
-                            x = x,
-                            method = 'mean',
-                            trim = 0.05
-                            )
-                        );
-                    x.fraction.kmeans <- kmeans.fraction(
-                        quantify.outliers(
-                            x = x,
-                            method = 'kmeans',
-                            nstart = kmeans.nstart
-                            )
-                        );
-                    x.cosine.similarity <- outlier.detection.cosine(
-                        x = x,
-                        distribution = optimal.distribution.data[i]
-                        );
-                    calculate.p.values(
-                        x = x,
-                        x.distribution = optimal.distribution.data[i],
-                        x.zrange.mean = x.zrange.mean,
-                        x.zrange.median = x.zrange.median,
-                        x.zrange.trimmean = x.zrange.trimmean,
-                        x.fraction.kmeans = x.fraction.kmeans,
-                        x.cosine.similarity = x.cosine.similarity,
-                        null.zrange.mean = null.zrange.mean,
-                        null.zrange.median = null.zrange.median,
-                        null.zrange.trimmean = null.zrange.trimmean,
-                        null.fraction.kmeans = null.fraction.kmeans,
-                        null.cosine.similarity = null.cosine.similarity,
-                        kmeans.nstart = kmeans.nstart
-                        );
-                    },
-                future.seed = TRUE
-                )
-            # Combine results from all genes
-            outlier.test.results.list[[next.name]] <- do.call(rbind, outlier.test.results.iter);
-            # Calculate FDR
+            outlier.test.results.list[[next.name]] <- perform.outlier.detection(
+                k,
+                data,
+                optimal.distribution.data,
+                null.zrange.mean,
+                null.zrange.median, 
+                null.zrange.trimmean,
+                null.fraction.kmeans,
+                null.cosine.similarity,
+                kmeans.nstart
+                );
             outlier.test.results.list[[next.name]]$fdr <- stats::p.adjust(
                 p = outlier.test.results.list[[next.name]]$p.value,
                 method = 'fdr'
                 );
             }
-        }
+        } 
     else {
         while (sum(stats::na.omit(outlier.test.results.list[[next.name]]$fdr) < fdr.threshold) > 0) {
             k <- k + 1;
             next.name <- paste0('round', k);
-            outlier.test.results.iter <- future.apply::future_lapply(
-                X = seq_len(nrow(data)),
-                FUN = function(i) {
-                    x <- as.numeric(data[i, ]);
-                    names(x) <- colnames(data);
-                    # Sort x in decreasing order
-                    sorted.indices <- order(x, decreasing = TRUE);
-                    # Remove the top k-1 values (k-1 because we're keeping the k-th value and below)
-                    x <- x[sorted.indices[k:length(x)]];
-                    # The most abundant sample in this round is the k-th highest overall
-                    most.abundant.sample <- names(x)[1];
-                    # Compute quantities for outlier detection in the remaining
-                    # samples of the observed transcript.
-                    x.zrange.mean <- zrange(
-                        quantify.outliers(
-                            x = x,
-                            method = 'mean'
-                            )
-                        );
-                    x.zrange.median <- zrange(
-                        quantify.outliers(
-                            x = x,
-                            method = 'median'
-                            )
-                        );
-                    x.zrange.trimmean <- zrange(
-                        quantify.outliers(
-                            x = x,
-                            method = 'mean',
-                            trim = 0.05
-                            )
-                        );
-                    x.fraction.kmeans <- kmeans.fraction(
-                        quantify.outliers(
-                            x = x,
-                            method = 'kmeans',
-                            nstart = kmeans.nstart
-                            )
-                        );
-                    x.cosine.similarity <- outlier.detection.cosine(
-                        x = x,
-                        distribution = optimal.distribution.data[i]
-                        );
-                    calculate.p.values(
-                        x = x,
-                        x.distribution = optimal.distribution.data[i],
-                        x.zrange.mean = x.zrange.mean,
-                        x.zrange.median = x.zrange.median,
-                        x.zrange.trimmean = x.zrange.trimmean,
-                        x.fraction.kmeans = x.fraction.kmeans,
-                        x.cosine.similarity = x.cosine.similarity,
-                        null.zrange.mean = null.zrange.mean,
-                        null.zrange.median = null.zrange.median,
-                        null.zrange.trimmean = null.zrange.trimmean,
-                        null.fraction.kmeans = null.fraction.kmeans,
-                        null.cosine.similarity = null.cosine.similarity,
-                        kmeans.nstart = kmeans.nstart
-                        );
-                    },
-                future.seed = TRUE
+            outlier.test.results.list[[next.name]] <- perform.outlier.detection(
+                k,
+                data,
+                optimal.distribution.data,
+                null.zrange.mean,
+                null.zrange.median, 
+                null.zrange.trimmean,
+                null.fraction.kmeans,
+                null.cosine.similarity,
+                kmeans.nstart
                 );
-            # Combine results from all genes
-            outlier.test.results.list[[next.name]] <- do.call(rbind, outlier.test.results.iter);
-            # Calculate FDR
             outlier.test.results.list[[next.name]]$fdr <- stats::p.adjust(
                 p = outlier.test.results.list[[next.name]]$p.value,
                 method = 'fdr'
                 );
             }
-        }
+        };
     # Give rownames
     for (i in 1:length(outlier.test.results.list)) {
         rownames(outlier.test.results.list[[i]]) <- rownames(data);
