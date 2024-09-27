@@ -294,7 +294,7 @@ detect.outliers <- function(
         method = 'fdr'
         );
     # This code implements an iterative outlier detection algorithm
-    # It processes data in rounds, removing extreme values each iteration, 
+    # It processes data in rounds, removing extreme values each iteration,
     # until no more outliers are detected based on either p-value or FDR thresholds.
     perform.outlier.detection <- function(
         k,
@@ -302,7 +302,7 @@ detect.outliers <- function(
         optimal.distribution.data,
         null.zrange.mean,
         null.zrange.median,
-        null.zrange.trimmean,    
+        null.zrange.trimmean,
         null.fraction.kmeans,
         null.cosine.similarity,
         kmeans.nstart
@@ -315,7 +315,6 @@ detect.outliers <- function(
                 sorted.indices <- order(x, decreasing = TRUE);
                 x <- x[sorted.indices[k:length(x)]];
                 most.abundant.sample <- names(x)[1];
-                
                 x.zrange.mean <- zrange(
                     quantify.outliers(
                         x = x,
@@ -375,7 +374,7 @@ detect.outliers <- function(
                 data,
                 optimal.distribution.data,
                 null.zrange.mean,
-                null.zrange.median, 
+                null.zrange.median,
                 null.zrange.trimmean,
                 null.fraction.kmeans,
                 null.cosine.similarity,
@@ -386,7 +385,7 @@ detect.outliers <- function(
                 method = 'fdr'
                 );
             }
-        } 
+        }
     else {
         while (sum(stats::na.omit(outlier.test.results.list[[next.name]]$fdr) < fdr.threshold) > 0) {
             k <- k + 1;
@@ -396,7 +395,7 @@ detect.outliers <- function(
                 data,
                 optimal.distribution.data,
                 null.zrange.mean,
-                null.zrange.median, 
+                null.zrange.median,
                 null.zrange.trimmean,
                 null.fraction.kmeans,
                 null.cosine.similarity,
