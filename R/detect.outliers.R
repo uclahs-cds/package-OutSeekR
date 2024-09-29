@@ -4,18 +4,18 @@
 #'
 #' @param data A matrix or data frame of normalized RNA-seq data, organized with transcripts on rows and samples on columns.  Transcript identifiers should be stored as `rownames(data)`.
 #' @param num.null The number of transcripts to generate when simulating from null distributions; default is one million.
-#' @param initial.screen.method The statistical criterion for initial gene selection; valid options are 'p-value' and 'FDR'.
+#' @param initial.screen.method The statistical criterion for initial gene selection; valid options are 'FDR' and 'p-value'.
 #' @param p.value.threshold The p-value threshold for the outlier test; default is 0.05.  Once the p-value for a sample exceeds `p.value.threshold`, testing for that transcript ceases, and all remaining samples will have p-values equal to `NA`.
 #' @param fdr.threshold The false discovery rate (FDR)-adjusted p-value threshold for determining the final count of outliers; default is 0.01.
 #' @param kmeans.nstart The number of random starts when computing k-means fraction; default is 1.  See `?stats::kmeans` for further details.
 #'
 #' @return A list consisting of the following entries:
-#' * `p.values`: a matrix of unadjusted p-values for the outlier test run on each transcript in `data`.
 #' * `fdr`: a matrix of FDR-adjusted p-values for the outlier test run on each transcript in `data`.
+#' * `p.values`: a matrix of unadjusted p-values for the outlier test run on each transcript in `data`.
 #' * `num.outliers`: a vector giving the number of outliers detected for each transcript based on the threshold.
 #' * `outlier.test.results.list`: a list of length `max(num.outliers) + 1` containing entries `roundN`, where `N` is between one and `max(num.outliers) + 1`.  `roundN` is the data frame of results for the outlier test after excluding the (N-1)th outlier sample, with `round1` being for the original data set (i.e., before excluding any outlier samples).
 #' * `distributions`: a numeric vector indicating the optimal distribution for each transcript.  Possible values are 1 (normal), 2 (log-normal), 3 (exponential), and 4 (gamma).
-#' * `initial.screen.method`: Specifies the statistical criterion for initial feature selection. Valid options are 'p-value' and 'FDR' (p-value used by default).
+#' * `initial.screen.method`: Specifies the statistical criterion for initial feature selection. Valid options are 'FDR' and 'p-value' (FDR used by default).
 #' @export
 #' @examples
 #' data(outliers);
@@ -27,7 +27,7 @@
 detect.outliers <- function(
         data,
         num.null = 1e6,
-        initial.screen.method = c('p.value', 'fdr'),
+        initial.screen.method = c('fdr', 'p.value'),
         p.value.threshold = 0.05,
         fdr.threshold = 0.01,
         kmeans.nstart = 1
