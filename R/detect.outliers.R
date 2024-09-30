@@ -36,6 +36,9 @@ detect.outliers <- function(
         'Missing values are not allowed in the input dataset.
         Please considering removing or imputing missing values first.' = 0 == sum(is.na(data))
         );
+    if (any(data > 0 && data < 1 * 10^(-50))) {
+        warning('data contains some very small non-zero numbers less than 10^-50. This can potentially cause errors in the k-means algorithm. Consider transforming your data first to address this issue (e.g. rounding down to zero)');
+        }
     # Match the initial screening method
     initial.screen.method <- match.arg(initial.screen.method);
 
