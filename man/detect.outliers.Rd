@@ -7,7 +7,7 @@
 detect.outliers(
   data,
   num.null = 1e+06,
-  initial.screen.method = c("p.value", "fdr"),
+  initial.screen.method = c("fdr", "p.value"),
   p.value.threshold = 0.05,
   fdr.threshold = 0.01,
   kmeans.nstart = 1
@@ -18,7 +18,7 @@ detect.outliers(
 
 \item{num.null}{The number of transcripts to generate when simulating from null distributions; default is one million.}
 
-\item{initial.screen.method}{The statistical criterion for initial gene selection; valid options are 'p-value' and 'FDR'.}
+\item{initial.screen.method}{The statistical criterion for initial gene selection; valid options are 'FDR' and 'p-value'.}
 
 \item{p.value.threshold}{The p-value threshold for the outlier test; default is 0.05.  Once the p-value for a sample exceeds \code{p.value.threshold}, testing for that transcript ceases, and all remaining samples will have p-values equal to \code{NA}.}
 
