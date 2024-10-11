@@ -37,7 +37,9 @@ The statistical approach of **OutSeekR** centers around the use of five statisti
 Specifically, it uses the five statistics calculated on the observed data and compares the distributions of these statistics with counterparts calculated using simulated null data. Observed data yielding statistics more extreme than those of the null data suggest the presence of outliers.
 
 Note: Input data with low variation (e.g., where 50% or more of the values are identical) may cause issues in calculating the MAD or performing K-means clustering. It is recommended to exclude such data from the analysis to ensure reliable results.
+**OutSeekR** first identifies which transcripts/features contain outlier values.  For a given transcript, the null hypothesis is there are no outlier values (*i.e.* all values come from some unknown population distribution) while the alternative hypothesis is that the transcript contains 1 or more outlier values from another distribution.  A small p-value or FDR-value gives evidence for the presence of 1 or more outliers.
 
+After determining which transcripts contain outliers, an iterative procedure is used to identify the exact number of outliers each transcript has.
 ## Overview
 
 As an overview, the **OutSeekR** algorithm does the following:
