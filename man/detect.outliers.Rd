@@ -6,7 +6,7 @@
 \usage{
 detect.outliers(
   data,
-  num.null = 1e+06,
+  num.null = 1000,
   initial.screen.method = c("fdr", "p.value"),
   p.value.threshold = 0.05,
   fdr.threshold = 0.01,
@@ -16,7 +16,7 @@ detect.outliers(
 \arguments{
 \item{data}{A matrix or data frame of normalized RNA-seq data, organized with transcripts on rows and samples on columns.  Transcript identifiers should be stored as \code{rownames(data)}.}
 
-\item{num.null}{The number of transcripts to generate when simulating from null distributions; default is one million.}
+\item{num.null}{The number of transcripts to generate when simulating from null distributions; default is 1000.}
 
 \item{initial.screen.method}{The statistical criterion for initial gene selection; valid options are 'FDR' and 'p-value'.}
 
