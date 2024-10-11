@@ -123,7 +123,7 @@ head(outlier.test.run.1$p.values);
 head(outlier.test.run.1$fdr);
 ```
 
-As explained in [Overview], testing for outliers for a given transcript stops after the p-values or FDRs from each rouns is found that exceeds the specified threshold. 
+As explained in [Overview], an iterative procedure is used to determine the exact number of outliers per transcript.  The iterations stop after the p-value or FDR-value exceeds the specified threshold.
 
 The entries `num.outliers` give transcript-specific counts of the number of outliers based on the threshold of specified `initial.screen.method`.
 
