@@ -3,7 +3,7 @@
 #' Detect outliers in normalized RNA-seq data.
 #'
 #' @param data A matrix or data frame of normalized RNA-seq data, organized with transcripts on rows and samples on columns.  Transcript identifiers should be stored as `rownames(data)`.
-#' @param num.null The number of transcripts to generate when simulating from null distributions; default is one million.
+#' @param num.null The number of transcripts to generate when simulating from null distributions; default is 1000.
 #' @param initial.screen.method The statistical criterion for initial gene selection; valid options are 'FDR' and 'p-value'.
 #' @param p.value.threshold The p-value threshold for the outlier test; default is 0.05.  Once the p-value for a sample exceeds `p.value.threshold`, testing for that transcript ceases, and all remaining samples will have p-values equal to `NA`.
 #' @param fdr.threshold The false discovery rate (FDR)-adjusted p-value threshold for determining the final count of outliers; default is 0.01.
@@ -26,7 +26,7 @@
 #'    );
 detect.outliers <- function(
         data,
-        num.null = 1e6,
+        num.null = 1000,
         initial.screen.method = c('fdr', 'p.value'),
         p.value.threshold = 0.05,
         fdr.threshold = 0.01,
