@@ -6,7 +6,8 @@
 4. [Parallelization](#parallelization)
 5. [Output](#output)
 6. [Example](#example)
-9. [License](#license)
+7. [Discussions](#discussions)
+8. [License](#license)
 
 
 ## Introduction
@@ -15,17 +16,19 @@
 
 The **OutSeekR** package implements a statistical approach to detecting outliers in RNA-seq and related data.
 
+---
+
 ## Methodology
 
 An analysis using **OutSeekR** should start with a matrix or data frame of normalized RNA-seq data, e.g., fragments per kilobase of transcript per million fragments mapped (FPKM), or similar data; in the case of RNA-seq data, we require normalized values rather than the counts themselves because the statistics we calculate assume continuous data. For simplicity, we'll refer to the rows of the input data set as 'transcripts' and the columns of the input data set as 'samples'. Transcript identifiers should be stored as the row names of the matrix or data frame, and sample identifiers should be stored as the column names.
 
 The statistical approach of **OutSeekR** centers around the use of five statistics calculated for each transcript in the observed data:
 
-1. the range of standard scores (z-scores) computed using the mean and standard deviation;
-2. the range of z-scores computed using the median and median absolute deviation (MAD);
-3. the range of z-scores computed using the 5%-trimmed mean and 5%-trimmed standard deviation;
-4. the fraction of observations assigned to the smaller cluster based on K-means clustering with K = 2 clusters; and
-5. the cosine similarity between the most extreme observed value and the largest quantile of a representative theoretical distribution (see [Simulating null data]).
+- 1. the range of standard scores (z-scores) computed using the mean and standard deviation;
+- 2. the range of z-scores computed using the median and median absolute deviation (MAD);
+- 3. the range of z-scores computed using the 5%-trimmed mean and 5%-trimmed standard deviation;
+- 4. the fraction of observations assigned to the smaller cluster based on K-means clustering with K = 2 clusters; and
+- 5. the cosine similarity between the most extreme observed value and the largest quantile of a representative theoretical distribution (see [Simulating null data]).
 
 Specifically, it uses the five statistics calculated on the observed data and compares the distributions of these statistics with counterparts calculated using simulated null data. Observed data yielding statistics more extreme than those of the null data suggest the presence of outliers.
 
@@ -34,6 +37,7 @@ Note: Input data with low variation (e.g., where 50% or more of the values are i
 
 After determining which transcripts contain outliers, an iterative procedure is used to identify the exact number of outliers each transcript has.
 
+---
 
 ## Installation
 
@@ -50,11 +54,15 @@ Or to install the latest development version from GitHub:
 devtools::install_github("uclahs-cds/package-OutSeekR")
 ```
 
+---
+
 ## Parallelization in **OutSeekR**
 
 The statistical approach to outlier detection implemented by **OutSeekR** is time-consuming. To reduce runtime, the code in **OutSeekR** has been written to allow parallelization. Parallelization is supported through the use of the package [**future.apply**](https://future.apply.futureverse.org/). **future.apply** is built on top of the future framework implemented by the [**future**](https://future.futureverse.org/) package, which provides a uniform way to parallelize code independent of operating system or computing environment. In particular, **OutSeekR** uses the `future_*apply()` functions defined in **future.apply** rather than their base R equivalents in order to take advantage of a parallelization strategy set with `future::plan()` by the user.
 
 **Note:** Depending on the size of the input data set and the number of null transcripts requested, the objects created by **OutSeekR** may exceed a limit defined in **future** to prevent exporting very large objects, which will trigger an error with a message referring to `future.globals.maxSize`. This can be avoided by setting `future.globals.maxSize` to a large value, e.g., `options(future.globals.maxSize = 8000 * 1024^2);  # = 8 GB`. See [the documentation of `future.options`](https://search.r-project.org/CRAN/refmans/future/html/future.options.html) for further details.
+
+---
 
 ## Output
 
@@ -66,6 +74,8 @@ The output of the main function in **OutSeekR**, `detect.outliers()`, is a named
 - `outlier.test.results.list`: a list of length `max(num.outliers) + 1` containing entries `roundN`, where `N` is between one and `max(num.outliers) + 1`.  `roundN` is the data frame of results for the outlier test after excluding the $(N-1)$th outlier sample, with `round1` being for the original data set (i.e., before excluding any outlier samples).
 - `distributions`: a numeric vector indicating the optimal distribution for each transcript. Possible values are 1 (normal), 2 (log-normal), 3 (exponential), and 4 (gamma).
 - `initial.screen.method`: Specifies the statistical criterion for initial feature selection. Valid options are 'p-value' and 'FDR'.
+
+---
 
 ## Example
 
@@ -193,6 +203,16 @@ head(outlier.test.run.2$fdr);
 # Check the distribution of number of outliers detected.
 table(outlier.test.run.2$num.outliers);
 ```
+
+---
+
+## Discussions
+
+- [Issue tracker](https://github.com/uclahs-cds/package-OutSeekR/issues) to report errors and enhancement ideas.
+- Discussions can take place in [package-OutSeekR Discussions](https://github.com/uclahs-cds/package-OutSeekR/discussions)
+- [package-OutSeekR pull requests](https://github.com/uclahs-cds/package-OutSeekR/pulls) are also open for discussion
+
+---
 
 ## License
 
