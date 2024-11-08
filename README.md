@@ -24,11 +24,11 @@ An analysis using **OutSeekR** should start with a matrix or data frame of norma
 
 The statistical approach of **OutSeekR** centers around the use of five statistics calculated for each transcript in the observed data:
 
-- 1. the range of standard scores (z-scores) computed using the mean and standard deviation;
-- 2. the range of z-scores computed using the median and median absolute deviation (MAD);
-- 3. the range of z-scores computed using the 5%-trimmed mean and 5%-trimmed standard deviation;
-- 4. the fraction of observations assigned to the smaller cluster based on K-means clustering with K = 2 clusters; and
-- 5. the cosine similarity between the most extreme observed value and the largest quantile of a representative theoretical distribution (see [Simulating null data]).
+- 1) the range of standard scores (z-scores) computed using the mean and standard deviation;
+- 2) the range of z-scores computed using the median and median absolute deviation (MAD);
+- 3) the range of z-scores computed using the 5%-trimmed mean and 5%-trimmed standard deviation;
+- 4) the fraction of observations assigned to the smaller cluster based on K-means clustering with K = 2 clusters; and
+- 5) the cosine similarity between the most extreme observed value and the largest quantile of a representative theoretical distribution (see [Simulating null data]).
 
 Specifically, it uses the five statistics calculated on the observed data and compares the distributions of these statistics with counterparts calculated using simulated null data. Observed data yielding statistics more extreme than those of the null data suggest the presence of outliers.
 
