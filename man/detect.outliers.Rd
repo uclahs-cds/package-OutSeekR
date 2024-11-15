@@ -16,7 +16,7 @@ detect.outliers(
 \arguments{
 \item{data}{A matrix or data frame of normalized RNA-seq data, organized with transcripts on rows and samples on columns.  Transcript identifiers should be stored as \code{rownames(data)}.}
 
-\item{num.null}{The number of transcripts to generate when simulating from null distributions; default is 1000.}
+\item{num.null}{The number of transcripts to generate when simulating from null distributions; default is 1000. We recommend using at least 10,000 iterations for publication-level results, with 100,000 or even one million iterations providing more robust estimates.}
 
 \item{initial.screen.method}{The statistical criterion for initial gene selection; valid options are 'FDR' and 'p-value'.}
 

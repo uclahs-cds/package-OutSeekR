@@ -3,7 +3,7 @@
 #' Detect outliers in normalized RNA-seq data.
 #'
 #' @param data A matrix or data frame of normalized RNA-seq data, organized with transcripts on rows and samples on columns.  Transcript identifiers should be stored as `rownames(data)`.
-#' @param num.null The number of transcripts to generate when simulating from null distributions; default is 1000.
+#' @param num.null The number of transcripts to generate when simulating from null distributions; default is 1000. We recommend using at least 10,000 iterations for publication-level results, with 100,000 or even one million iterations providing more robust estimates.
 #' @param initial.screen.method The statistical criterion for initial gene selection; valid options are 'FDR' and 'p-value'.
 #' @param p.value.threshold The p-value threshold for the outlier test; default is 0.05.  Once the p-value for a sample exceeds `p.value.threshold`, testing for that transcript ceases, and all remaining samples will have p-values equal to `NA`.
 #' @param fdr.threshold The false discovery rate (FDR)-adjusted p-value threshold for determining the final count of outliers; default is 0.01.
