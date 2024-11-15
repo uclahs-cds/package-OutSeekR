@@ -1,6 +1,6 @@
 # Unreleased
 
-# OutSeekR 1.0.0 - 2024-11-07 
+# OutSeekR 1.0.0 - 2024-11-15
 
 ## Added
 * Implementation of core *Outlier Detection Algorithm*, a statistical approach for detecting transcript-level outliers in RNA-seq or related data types, leveraging normalized data (e.g., FPKM) and several statistical metrics.
