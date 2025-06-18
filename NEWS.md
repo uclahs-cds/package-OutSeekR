@@ -1,4 +1,7 @@
-# Unreleased
+# OutSeekR 1.0.1 - 2025-06-17
+
+## Changed
+* Update `R CMD check` CI/CD workflow using `renv` for dependency management.
 
 # OutSeekR 1.0.0 - 2024-11-15
 
