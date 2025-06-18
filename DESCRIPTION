@@ -9,7 +9,6 @@ Authors@R: c(
     person("Jaron", "Arbet", email = "jarbet@mednet.ucla.edu", role = "ctb"),
     person("Paul", "Boutros", email = "pboutros@mednet.ucla.edu", role = c("aut", "cre", "cph"),
     person("Dan", "Knight", role = "ctb"))
-    )
 Description: An approach to outlier detection in RNA-seq and related data
     based on five statistics. 'OutSeekR' implements an outlier test by comparing
     the distributions of these statistics in observed data with those of
