@@ -1,14 +1,14 @@
 Package: OutSeekR
 Type: Package
 Title: Statistical Approach to Outlier Detection in RNA-Seq and Related Data
-Version: 1.0.0
-Date: 2024-11-15
+Version: 1.0.1
+Date: 2025-06-17
 Authors@R: c(
     person("Jee Yun", "Han", email = "jyhan@mednet.ucla.edu", role = "aut"),
     person("John", "Sahrmann", email = "jsahrmann@mednet.ucla.edu", role = "aut"),
     person("Jaron", "Arbet", email = "jarbet@mednet.ucla.edu", role = "ctb"),
-    person("Paul", "Boutros", email = "pboutros@mednet.ucla.edu", role = c("aut", "cre", "cph"))
-    )
+    person("Paul", "Boutros", email = "pboutros@mednet.ucla.edu", role = c("aut", "cre", "cph")),
+    person("Dan", "Knight", role = "ctb"))
 Description: An approach to outlier detection in RNA-seq and related data
     based on five statistics. 'OutSeekR' implements an outlier test by comparing
     the distributions of these statistics in observed data with those of
